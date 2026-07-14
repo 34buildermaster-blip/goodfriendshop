@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #111827;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-line-seed-sans-th), "LINE Seed Sans TH", "Leelawadee UI", Tahoma, Arial, sans-serif;
+  --font-mono: "Cascadia Code", Consolas, monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-line-seed-sans-th), "LINE Seed Sans TH", "Leelawadee UI", Tahoma, Arial, sans-serif;
+}
+
+.mint-page-surface {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(14, 13, 23, 0.96) 0%,
+      rgba(14, 13, 23, 0.28) 10%,
+      rgba(14, 13, 23, 0) 24%,
+      rgba(14, 13, 23, 0.08) 78%,
+      rgba(14, 13, 23, 0.88) 100%
+    ),
+    linear-gradient(
+      90deg,
+      #0e0d17 0%,
+      #0a201d 12%,
+      #06402f 34%,
+      #065a3d 50%,
+      #06402f 66%,
+      #0a201d 88%,
+      #0e0d17 100%
+    );
+}
+
+.announcement-ticker {
+  contain: layout paint;
+}
+
+.announcement-ticker::before,
+.announcement-ticker::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  z-index: 1;
+  width: 34px;
+  pointer-events: none;
+}
+
+.announcement-ticker::before {
+  left: 0;
+  background: linear-gradient(90deg, #141b24 0%, rgba(20, 27, 36, 0) 100%);
+}
+
+.announcement-ticker::after {
+  right: 0;
+  background: linear-gradient(270deg, #141b24 0%, rgba(20, 27, 36, 0) 100%);
+}
+
+.announcement-ticker-track {
+  animation: announcement-scroll 22s linear infinite;
+  will-change: transform;
+}
+
+@keyframes announcement-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .announcement-ticker-track {
+    animation: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .announcement-ticker {
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      #000 9%,
+      #000 91%,
+      transparent 100%
+    );
+  }
+
+  .announcement-ticker::before,
+  .announcement-ticker::after {
+    display: none;
+  }
+}

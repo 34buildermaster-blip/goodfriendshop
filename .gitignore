@@ -1,0 +1,12 @@
+node_modules/
+vendor/
+.env
+.env.*
+!.env.example
+.next/
+frontend/out/
+dist/
+build/
+storage/logs/*.log
+backend/database/*.sqlite
+work/

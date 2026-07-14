@@ -1,0 +1,14 @@
+{
+  "name": "game-topup",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "start:frontend": "npm --prefix frontend run start",
+    "build:frontend": "npm --prefix frontend run build",
+    "lint:frontend": "npm --prefix frontend run lint",
+    "dev:backend": "cd backend && C:\\laragon\\bin\\php\\php-8.3.30-Win32-vs16-x64\\php.exe artisan serve --host=127.0.0.1 --port=8001"
+  },
+  "workspaces": [
+    "frontend"
+  ]
+}

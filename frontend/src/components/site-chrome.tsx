@@ -1,0 +1,340 @@
+import Image from "next/image";
+import Link from "next/link";
+import {
+  Bell,
+  ClipboardList,
+  LogOut,
+  Mail,
+  Menu,
+  MessageCircle,
+  Search,
+  Settings,
+  ShoppingBag,
+  UserRound,
+} from "lucide-react";
+import { navItems } from "@/lib/site-data";
+
+const profileMenu = [
+  { label: "Orders", icon: ClipboardList, active: true },
+  { label: "Customers", icon: UserRound },
+  { label: "Settings", icon: Settings },
+];
+
+export function SiteHeader({ activeHref = "/" }: { activeHref?: string }) {
+  return (
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#0e0d17]/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-[73px] max-w-[1440px] items-center gap-5 px-5 lg:px-11">
+        <Link className="shrink-0 text-lg font-bold tracking-wide text-white" href="/">
+          LOGO
+        </Link>
+
+        <nav className="hidden flex-1 items-center justify-center gap-8 text-sm font-medium text-white lg:flex">
+          {navItems.map((item) => {
+            const active = activeHref === item.href;
+            return (
+              <Link
+                className={`relative py-6 transition hover:text-emerald-300 ${
+                  active ? "text-emerald-400" : ""
+                }`}
+                href={item.href}
+                key={item.href}
+              >
+                {item.label}
+                {active ? (
+                  <span className="absolute inset-x-1 -bottom-px h-1 rounded-full bg-emerald-400" />
+                ) : null}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="ml-auto hidden h-11 w-[246px] items-center gap-3 rounded-[14px] bg-emerald-500/25 px-4 text-emerald-300 xl:flex">
+          <Search size={16} />
+          <span className="text-xs">Search ...</span>
+        </div>
+
+        <div className="group relative hidden items-center gap-3 lg:flex">
+          <div className="text-right leading-tight">
+            <p className="text-xs font-semibold text-white">Mark Collins</p>
+            <p className="text-[10px] text-emerald-400">Business man</p>
+          </div>
+          <button className="relative h-11 w-11 overflow-hidden rounded-full border border-white/20 bg-white/10">
+            <Image
+              alt="User profile"
+              className="object-cover"
+              fill
+              sizes="44px"
+              src="/figma/game-mobile-legends.webp"
+            />
+          </button>
+          <button className="absolute -right-5 -top-2 grid h-7 w-7 place-items-center rounded-full bg-white text-emerald-600">
+            <Bell size={14} />
+          </button>
+
+          <div className="invisible absolute right-0 top-14 w-60 translate-y-2 rounded-3xl border border-white/10 bg-[#111017]/90 p-4 opacity-0 shadow-2xl shadow-black/30 backdrop-blur-xl transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+            {profileMenu.map(({ active, icon: Icon, label }) => (
+              <button
+                className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm transition hover:bg-white/10 ${
+                  active ? "text-emerald-400" : "text-white"
+                }`}
+                key={label}
+              >
+                <Icon size={17} />
+                {label}
+              </button>
+            ))}
+            <div className="my-3 h-px bg-white/10" />
+            <button className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-white transition hover:bg-white/10">
+              <LogOut size={17} />
+              Log out
+            </button>
+          </div>
+        </div>
+
+        <button className="ml-auto grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-white lg:hidden">
+          <Menu size={22} />
+        </button>
+      </div>
+    </header>
+  );
+}
+
+export function SectionTitle({
+  actionHref,
+  actionLabel = "ดูทั้งหมด",
+  subtitle,
+  title,
+}: {
+  actionHref?: string;
+  actionLabel?: string;
+  subtitle: string;
+  title: string;
+}) {
+  return (
+    <div className="mb-6 flex items-end justify-between gap-4">
+      <div>
+        <h2 className="text-2xl font-semibold text-white md:text-3xl">{title}</h2>
+        <p className="mt-1 text-xs font-medium uppercase tracking-[0.08em] text-emerald-400">
+          {subtitle}
+        </p>
+      </div>
+      {actionHref ? (
+        <Link
+          className="shrink-0 text-sm font-medium text-white/85 transition hover:text-emerald-300"
+          href={actionHref}
+        >
+          {actionLabel}
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
+export function PageIntro({
+  eyebrow,
+  title,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <section className="mx-auto max-w-7xl px-5 pb-10 pt-32">
+      <p className="text-xs font-medium uppercase tracking-[0.18em] text-emerald-400">
+        {eyebrow}
+      </p>
+      <h1 className="mt-4 max-w-4xl text-4xl font-bold leading-tight text-white md:text-6xl">
+        {title}
+      </h1>
+      <p className="mt-5 max-w-3xl text-base leading-8 text-white/72 md:text-lg">
+        {description}
+      </p>
+    </section>
+  );
+}
+
+export function GameCard({
+  featured,
+  image,
+  name,
+}: {
+  featured?: boolean;
+  image: string;
+  name: string;
+}) {
+  return (
+    <article
+      className={`rounded-[28px] border bg-[#161d26]/80 p-2.5 text-center transition hover:-translate-y-1 hover:border-emerald-400 hover:shadow-[0_0_24px_rgba(0,207,127,0.22)] ${
+        featured
+          ? "border-emerald-400 shadow-[0_0_24px_rgba(0,207,127,0.35)]"
+          : "border-[#586c64]/70"
+      }`}
+    >
+      <div className="relative aspect-square overflow-hidden rounded-[22px]">
+        <Image
+          alt={name}
+          className="object-cover"
+          fill
+          sizes="(min-width: 1024px) 202px, 42vw"
+          src={image}
+        />
+      </div>
+      <h3 className="mt-4 min-h-5 text-sm font-medium text-white">{name}</h3>
+      <button
+        className={`mt-3 h-10 rounded-2xl px-5 text-base font-semibold transition ${
+          featured
+            ? "border border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-white"
+            : "bg-emerald-500 text-white hover:bg-emerald-400"
+        }`}
+      >
+        เติมเกม
+      </button>
+    </article>
+  );
+}
+
+export function NewsCard({
+  slug,
+  image,
+  title,
+  excerpt,
+  featured,
+}: {
+  excerpt?: string;
+  featured?: boolean;
+  image: string;
+  slug?: string;
+  title: string;
+}) {
+  const href = slug ? `/news/${slug}` : "/news";
+
+  if (featured) {
+    return (
+      <article className="rounded-[32px] border border-[#586c64]/70 bg-[#161d26]/80 p-4">
+        <div className="relative aspect-[16/9] overflow-hidden rounded-[26px]">
+          <Image
+            alt={title}
+            className="object-cover"
+            fill
+            sizes="(min-width: 1024px) 520px, 90vw"
+            src={image}
+          />
+        </div>
+        <h3 className="mt-5 max-w-xl text-lg leading-snug text-white md:text-xl">
+          {title}
+        </h3>
+        {excerpt ? <p className="mt-3 text-sm leading-6 text-white/65">{excerpt}</p> : null}
+        <div className="mt-5 flex items-center justify-between">
+          <Link
+            className="flex h-10 items-center justify-center rounded-full bg-emerald-500 px-5 text-sm font-semibold text-white"
+            href={href}
+          >
+            อ่านเพิ่มเติม
+          </Link>
+          <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs text-emerald-400">
+            มาแรง
+          </span>
+        </div>
+      </article>
+    );
+  }
+
+  return (
+    <article className="grid grid-cols-[112px_1fr] gap-4 rounded-[28px] border border-[#586c64]/70 bg-[#161d26]/80 p-4 sm:grid-cols-[168px_1fr]">
+      <div className="relative aspect-square overflow-hidden rounded-[22px]">
+        <Image
+          alt={title}
+          className="object-cover"
+          fill
+          sizes="168px"
+          src={image}
+        />
+      </div>
+      <div className="flex min-w-0 flex-col justify-center">
+        <h3 className="text-sm leading-relaxed text-white md:text-base">{title}</h3>
+        {excerpt ? <p className="mt-2 line-clamp-2 text-xs leading-5 text-white/60">{excerpt}</p> : null}
+        <Link
+          className="mt-4 flex h-10 w-fit items-center justify-center rounded-full bg-emerald-500 px-5 text-sm font-semibold text-white"
+          href={href}
+        >
+          อ่านเพิ่มเติม
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+export function SiteFooter() {
+  return (
+    <footer className="mt-12 border-t border-white/5 bg-[rgba(18,16,26,0.35)]">
+      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 lg:grid-cols-[1.2fr_0.8fr_1fr]">
+        <div>
+          <h2 className="text-3xl font-semibold text-white">Good Friend Shop</h2>
+          <p className="mt-1 font-medium text-emerald-400">
+            เติมเกมไวเหมือนเพื่อนรู้ใจ ราคาสบายกระเป๋าที่สุด!
+          </p>
+          <p className="mt-5 max-w-md text-sm leading-7 text-white/80">
+            เกมเมอร์ทุกคนรู้ดีว่าการจะก้าวไปสู่จุดสูงสุดในเกมนั้น เวลาและเงินทุนคือสิ่งสำคัญ
+            GoodFriendShop เข้าใจคุณ เราคือเพื่อนแท้ของเกมเมอร์
+          </p>
+        </div>
+        <div>
+          <h3 className="font-semibold text-white">ติดต่อเรา</h3>
+          <div className="mt-6 space-y-4 text-sm text-white/85">
+            <p className="flex items-center gap-3">
+              <MessageCircle className="text-white" size={20} />
+              xxxxxxx
+            </p>
+            <p className="flex items-center gap-3">
+              <Mail className="text-white" size={20} />
+              xxxxxxx@gmail.com
+            </p>
+          </div>
+          <div className="mt-6 flex gap-3">
+            {["f", "LINE", "X"].map((item) => (
+              <span
+                className="grid h-11 min-w-11 place-items-center rounded-full bg-emerald-500 px-3 text-xs font-medium text-white"
+                key={item}
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="relative min-h-[220px]">
+          <Image
+            alt="Good Friend Shop mobile rewards"
+            className="object-contain"
+            fill
+            sizes="340px"
+            src="/figma/footer-phone.webp"
+          />
+        </div>
+      </div>
+      <div className="bg-[#07080a] px-5 py-5">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-3 text-center text-xs text-white/60">
+          <span>รองรับการชำระเงินหลากหลายช่องทาง</span>
+          <Image
+            alt="Payment methods"
+            height={36}
+            src="/figma/payments.webp"
+            width={572}
+          />
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export function OrderButton() {
+  return (
+    <button
+      className="flex h-10 items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 text-sm font-semibold text-white transition hover:bg-emerald-400"
+      type="button"
+    >
+      <ShoppingBag size={16} />
+      สั่งซื้อ
+    </button>
+  );
+}
