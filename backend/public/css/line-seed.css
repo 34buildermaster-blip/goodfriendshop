@@ -1,0 +1,15 @@
+@font-face {
+    font-family: "LINE Seed Sans TH";
+    src: url("/fonts/line-seed/LINESeedSansTH_Rg.otf") format("opentype");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "LINE Seed Sans TH";
+    src: url("/fonts/line-seed/LINESeedSansTH_Bd.otf") format("opentype");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 700;
+}

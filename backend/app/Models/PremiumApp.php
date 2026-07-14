@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+#[Fillable([
+    'name',
+    'slug',
+    'provider',
+    'description',
+    'image_path',
+    'price',
+    'cost',
+    'currency',
+    'duration_days',
+    'status',
+    'sort_order',
+])]
+class PremiumApp extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    public const STATUS_ACTIVE = 'active';
+
+    public const STATUS_DRAFT = 'draft';
+
+    public const STATUS_INACTIVE = 'inactive';
+
+    public function imageUrl(): ?string
+    {
+        if (blank($this->image_path)) {
+            return null;
+        }
+
+        if (Str::startsWith($this->image_path, ['http://', 'https://', '/'])) {
+            return $this->image_path;
+        }
+
+        return Storage::url($this->image_path);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'cost' => 'decimal:2',
+            'duration_days' => 'integer',
+            'price' => 'decimal:2',
+            'sort_order' => 'integer',
+        ];
+    }
+}
