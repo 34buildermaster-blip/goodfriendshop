@@ -1,9 +1,11 @@
 import { GameCard, PageIntro, SectionTitle, SiteFooter, SiteHeader } from "@/components/site-chrome";
-import { games } from "@/lib/site-data";
+import { getGames } from "@/lib/api";
 
 const categories = ["ยอดนิยม", "มือถือ", "PC", "Garena", "Steam"];
 
-export default function GamesPage() {
+export default async function GamesPage() {
+  const games = await getGames();
+
   return (
     <main className="min-h-screen overflow-hidden bg-[#0e0d17] text-white">
       <SiteHeader activeHref="/games" />

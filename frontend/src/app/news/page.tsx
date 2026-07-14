@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, Megaphone, Trophy } from "lucide-react";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-chrome";
-import { news } from "@/lib/site-data";
+import { getNews } from "@/lib/api";
 import { assetPath } from "@/lib/paths";
 
 const categories = ["ทั้งหมด", "ข่าวเกม", "กิจกรรม", "การแข่งขัน", "โปรโมชัน"];
@@ -25,7 +25,8 @@ const activityHighlights = [
   },
 ];
 
-export default function NewsPage() {
+export default async function NewsPage() {
+  const news = await getNews();
   const featured = news[0];
   const newsList = [...news, ...news.slice(1), news[0]];
 

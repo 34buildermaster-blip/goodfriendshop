@@ -35,6 +35,7 @@ export const games = [
 export type PremiumProduct = {
   id: string;
   title: string;
+  image?: string;
   price: string;
   duration: string;
   warranty: string;

@@ -102,3 +102,40 @@ body {
     display: none;
   }
 }
+
+.news-content > * + * {
+  margin-top: 1.25rem;
+}
+
+.news-content :is(h2, h3, h4) {
+  color: #fff;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.news-content h2 {
+  font-size: 1.75rem;
+}
+
+.news-content h3 {
+  font-size: 1.35rem;
+}
+
+.news-content a {
+  color: #34d399;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.news-content ul,
+.news-content ol {
+  margin-left: 1.25rem;
+}
+
+.news-content ul {
+  list-style: disc;
+}
+
+.news-content ol {
+  list-style: decimal;
+}

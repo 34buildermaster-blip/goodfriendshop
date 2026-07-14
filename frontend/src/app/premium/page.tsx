@@ -9,7 +9,8 @@ import {
   SiteFooter,
   SiteHeader,
 } from "@/components/site-chrome";
-import { premiumProducts, type PremiumProduct } from "@/lib/site-data";
+import { getPremiumProducts, type PremiumProductItem } from "@/lib/api";
+import { premiumProducts as fallbackPremiumProducts } from "@/lib/site-data";
 import { assetPath } from "@/lib/paths";
 
 function PremiumProductCard({
@@ -17,7 +18,7 @@ function PremiumProductCard({
   product,
 }: {
   onDetails: () => void;
-  product: PremiumProduct;
+  product: PremiumProductItem;
 }) {
   return (
     <article className="rounded-[32px] border border-[#586c64]/70 bg-[#161d26]/80 p-4">
@@ -27,7 +28,7 @@ function PremiumProductCard({
           className="object-cover"
           fill
           sizes="(min-width: 1024px) 420px, 90vw"
-          src={assetPath("/figma/premium-netflix.webp")}
+          src={assetPath(product.image ?? "/figma/premium-netflix.webp")}
         />
       </div>
       <div className="px-3 pb-2 pt-6">
@@ -68,7 +69,7 @@ function ProductDetailModal({
   product,
 }: {
   onClose: () => void;
-  product: PremiumProduct;
+  product: PremiumProductItem;
 }) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -110,7 +111,7 @@ function ProductDetailModal({
             className="object-cover"
             fill
             sizes="(min-width: 768px) 360px, 100vw"
-            src={assetPath("/figma/premium-netflix.webp")}
+            src={assetPath(product.image ?? "/figma/premium-netflix.webp")}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#101923] via-transparent to-transparent md:bg-gradient-to-r" />
         </div>
@@ -175,9 +176,26 @@ function ProductDetailModal({
 }
 
 export default function PremiumPage() {
-  const [selectedProduct, setSelectedProduct] = useState<PremiumProduct | null>(
+  const [products, setProducts] = useState<PremiumProductItem[]>(
+    fallbackPremiumProducts,
+  );
+  const [selectedProduct, setSelectedProduct] = useState<PremiumProductItem | null>(
     null,
   );
+
+  useEffect(() => {
+    let active = true;
+
+    getPremiumProducts().then((items) => {
+      if (active) {
+        setProducts(items);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#0e0d17] text-white">
@@ -194,7 +212,7 @@ export default function PremiumPage() {
             title="แอพขายดี"
           />
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {premiumProducts.map((product) => (
+            {products.map((product) => (
               <PremiumProductCard
                 key={product.id}
                 onDetails={() => setSelectedProduct(product)}

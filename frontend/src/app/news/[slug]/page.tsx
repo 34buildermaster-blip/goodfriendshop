@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { NewsCard, SiteFooter, SiteHeader } from "@/components/site-chrome";
 import { news } from "@/lib/site-data";
+import { getNews, getNewsArticle } from "@/lib/api";
 import { assetPath } from "@/lib/paths";
 
 type NewsDetailPageProps = {
@@ -23,7 +24,7 @@ export async function generateMetadata({
   params,
 }: NewsDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const article = news.find((item) => item.slug === slug);
+  const article = await getNewsArticle(slug);
 
   return {
     title: article ? `${article.title} | Good Friend Shop` : "News | Good Friend Shop",
@@ -42,13 +43,13 @@ function getArticleBody(title: string, excerpt: string) {
 
 export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
   const { slug } = await params;
-  const article = news.find((item) => item.slug === slug);
+  const article = await getNewsArticle(slug);
 
   if (!article) {
     notFound();
   }
 
-  const related = news.filter((item) => item.slug !== article.slug);
+  const related = (await getNews()).filter((item) => item.slug !== article.slug);
   const paragraphs = getArticleBody(article.title, article.excerpt);
 
   return (
@@ -83,11 +84,18 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
               By {article.category} · {article.date}
             </p>
 
-            <div className="mt-8 space-y-6 text-lg leading-8 text-white/82">
-              {paragraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
+            {article.content ? (
+              <div
+                className="news-content mt-8 text-lg leading-8 text-white/82"
+                dangerouslySetInnerHTML={{ __html: article.content }}
+              />
+            ) : (
+              <div className="mt-8 space-y-6 text-lg leading-8 text-white/82">
+                {paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            )}
 
             <div className="mt-12 rounded-[32px] border border-[#586c64]/70 bg-[#161d26]/80 p-6">
               <p className="text-sm font-medium text-emerald-300">หมายเหตุ</p>

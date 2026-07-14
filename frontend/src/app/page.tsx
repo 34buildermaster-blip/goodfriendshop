@@ -20,6 +20,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import { getGames, getNews, getPremiumProducts } from "@/lib/api";
 import { assetPath } from "@/lib/paths";
 
 const navItems = [
@@ -529,11 +530,34 @@ function NewsCard({
 }
 
 export default function Home() {
+  const [homeGames, setHomeGames] = useState(games);
+  const [homePremiumProducts, setHomePremiumProducts] = useState(premiumProducts);
+  const [homeNews, setHomeNews] = useState(news);
   const [selectedProduct, setSelectedProduct] = useState<PremiumProduct | null>(
     null,
   );
   const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
   const activeHeroSlide = heroSlides[currentHeroSlide];
+
+  useEffect(() => {
+    let active = true;
+
+    Promise.all([getGames(), getPremiumProducts(), getNews()]).then(
+      ([gameItems, premiumItems, newsItems]) => {
+        if (!active) {
+          return;
+        }
+
+        setHomeGames(gameItems);
+        setHomePremiumProducts(premiumItems);
+        setHomeNews(newsItems);
+      },
+    );
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -698,7 +722,7 @@ export default function Home() {
           subtitle="Game Topup Online"
         />
         <div className="relative grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {games.map((game) => (
+          {homeGames.map((game) => (
             <GameCard key={game.name} {...game} />
           ))}
         </div>
@@ -711,7 +735,7 @@ export default function Home() {
           subtitle="แอพพรีเมียมแนะนำ"
         />
         <div className="grid gap-5 lg:grid-cols-3">
-          {premiumProducts.map((product) => (
+          {homePremiumProducts.map((product) => (
             <PremiumCard
               key={product.id}
               {...product}
@@ -728,9 +752,9 @@ export default function Home() {
           subtitle="New & Event"
         />
         <div className="relative grid gap-5 lg:grid-cols-[1fr_1.28fr]">
-          <NewsCard {...news[0]} />
+          <NewsCard {...homeNews[0]} />
           <div className="grid gap-5">
-            {news.slice(1).map((item) => (
+            {homeNews.slice(1).map((item) => (
               <NewsCard key={item.title} {...item} />
             ))}
           </div>
