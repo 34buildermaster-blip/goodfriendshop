@@ -20,6 +20,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import { assetPath } from "@/lib/paths";
 
 const navItems = [
   { label: "หน้าหลัก", href: "/" },
@@ -229,7 +230,7 @@ function Header() {
               className="object-cover"
               fill
               sizes="44px"
-              src="/figma/game-mobile-legends.webp"
+              src={assetPath("/figma/game-mobile-legends.webp")}
             />
           </button>
           <button className="absolute -right-5 -top-2 grid h-7 w-7 place-items-center rounded-full bg-white text-emerald-600">
@@ -287,7 +288,7 @@ function GameCard({
           className="object-cover"
           fill
           sizes="(min-width: 1024px) 202px, 42vw"
-          src={image}
+          src={assetPath(image)}
         />
       </div>
       <h3 className="mt-4 min-h-5 text-sm font-medium text-white">{name}</h3>
@@ -321,7 +322,7 @@ function PremiumCard({
           className="object-cover"
           fill
           sizes="(min-width: 1024px) 420px, 90vw"
-          src="/figma/premium-netflix.webp"
+          src={assetPath("/figma/premium-netflix.webp")}
         />
       </div>
       <div className="px-3 pb-2 pt-6">
@@ -402,7 +403,7 @@ function ProductDetailModal({
             className="object-cover"
             fill
             sizes="(min-width: 768px) 360px, 100vw"
-            src="/figma/premium-netflix.webp"
+            src={assetPath("/figma/premium-netflix.webp")}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#101923] via-transparent to-transparent md:bg-gradient-to-r" />
         </div>
@@ -486,7 +487,7 @@ function NewsCard({
             className="object-cover"
             fill
             sizes="(min-width: 1024px) 520px, 90vw"
-            src={image}
+            src={assetPath(image)}
           />
         </div>
         <h3 className="mt-5 max-w-xl text-lg leading-snug text-white md:text-xl">
@@ -512,7 +513,7 @@ function NewsCard({
           className="object-cover"
           fill
           sizes="168px"
-          src={image}
+          src={assetPath(image)}
         />
       </div>
       <div className="flex min-w-0 flex-col justify-center">
@@ -557,7 +558,7 @@ export default function Home() {
             key={slide.title}
             priority={index === 0}
             sizes="100vw"
-            src={slide.image}
+            src={assetPath(slide.image)}
           />
         ))}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0e0d17]/10 via-[#0e0d17]/35 to-[#0e0d17]" />
@@ -640,7 +641,7 @@ export default function Home() {
                         className="object-cover"
                         fill
                         sizes="72px"
-                        src={slide.image}
+                        src={assetPath(slide.image)}
                       />
                     </span>
                     <span>
@@ -779,7 +780,7 @@ export default function Home() {
               className="object-contain"
               fill
               sizes="340px"
-              src="/figma/footer-phone.webp"
+              src={assetPath("/figma/footer-phone.webp")}
             />
           </div>
         </div>
@@ -789,7 +790,7 @@ export default function Home() {
             <Image
               alt="Payment methods"
               height={36}
-              src="/figma/payments.webp"
+              src={assetPath("/figma/payments.webp")}
               width={572}
             />
           </div>

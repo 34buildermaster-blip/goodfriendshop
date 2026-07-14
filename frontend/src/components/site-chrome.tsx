@@ -13,6 +13,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { navItems } from "@/lib/site-data";
+import { assetPath } from "@/lib/paths";
 
 const profileMenu = [
   { label: "Orders", icon: ClipboardList, active: true },
@@ -64,7 +65,7 @@ export function SiteHeader({ activeHref = "/" }: { activeHref?: string }) {
               className="object-cover"
               fill
               sizes="44px"
-              src="/figma/game-mobile-legends.webp"
+              src={assetPath("/figma/game-mobile-legends.webp")}
             />
           </button>
           <button className="absolute -right-5 -top-2 grid h-7 w-7 place-items-center rounded-full bg-white text-emerald-600">
@@ -177,7 +178,7 @@ export function GameCard({
           className="object-cover"
           fill
           sizes="(min-width: 1024px) 202px, 42vw"
-          src={image}
+          src={assetPath(image)}
         />
       </div>
       <h3 className="mt-4 min-h-5 text-sm font-medium text-white">{name}</h3>
@@ -218,7 +219,7 @@ export function NewsCard({
             className="object-cover"
             fill
             sizes="(min-width: 1024px) 520px, 90vw"
-            src={image}
+            src={assetPath(image)}
           />
         </div>
         <h3 className="mt-5 max-w-xl text-lg leading-snug text-white md:text-xl">
@@ -248,7 +249,7 @@ export function NewsCard({
           className="object-cover"
           fill
           sizes="168px"
-          src={image}
+          src={assetPath(image)}
         />
       </div>
       <div className="flex min-w-0 flex-col justify-center">
@@ -308,7 +309,7 @@ export function SiteFooter() {
             className="object-contain"
             fill
             sizes="340px"
-            src="/figma/footer-phone.webp"
+            src={assetPath("/figma/footer-phone.webp")}
           />
         </div>
       </div>
@@ -318,7 +319,7 @@ export function SiteFooter() {
           <Image
             alt="Payment methods"
             height={36}
-            src="/figma/payments.webp"
+            src={assetPath("/figma/payments.webp")}
             width={572}
           />
         </div>

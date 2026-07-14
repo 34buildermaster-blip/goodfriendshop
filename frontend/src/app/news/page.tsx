@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CalendarDays, Megaphone, Trophy } from "lucide-react";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-chrome";
 import { news } from "@/lib/site-data";
+import { assetPath } from "@/lib/paths";
 
 const categories = ["ทั้งหมด", "ข่าวเกม", "กิจกรรม", "การแข่งขัน", "โปรโมชัน"];
 
@@ -48,7 +49,7 @@ export default function NewsPage() {
                   fill
                   priority
                   sizes="(min-width: 1024px) 760px, 100vw"
-                  src={featured.image}
+                  src={assetPath(featured.image)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#161d26] via-[#161d26]/10 to-transparent" />
                 <span className="absolute left-5 top-5 rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-white">
@@ -120,7 +121,7 @@ export default function NewsPage() {
                     className="object-cover"
                     fill
                     sizes="(min-width: 1280px) 390px, (min-width: 768px) 48vw, 100vw"
-                    src={item.image}
+                    src={assetPath(item.image)}
                   />
                 </div>
                 <div className="flex min-h-[254px] flex-col p-5">

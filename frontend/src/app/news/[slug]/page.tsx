@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { NewsCard, SiteFooter, SiteHeader } from "@/components/site-chrome";
 import { news } from "@/lib/site-data";
+import { assetPath } from "@/lib/paths";
 
 type NewsDetailPageProps = {
   params: Promise<{
@@ -71,7 +72,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
                 fill
                 priority
                 sizes="(min-width: 1024px) 780px, 100vw"
-                src={article.image}
+                src={assetPath(article.image)}
               />
             </div>
 

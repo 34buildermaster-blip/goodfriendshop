@@ -2,6 +2,7 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { PageIntro, SectionTitle, SiteFooter, SiteHeader } from "@/components/site-chrome";
 import { otherProducts } from "@/lib/site-data";
+import { assetPath } from "@/lib/paths";
 
 export default function ProductsPage() {
   return (
@@ -28,7 +29,7 @@ export default function ProductsPage() {
                     className="object-cover"
                     fill
                     sizes="(min-width: 1024px) 420px, 90vw"
-                    src={image}
+                    src={assetPath(image)}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#161d26] via-transparent to-transparent" />
                 </div>

@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Mail, MapPin, MessageCircle, Send } from "lucide-react";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-chrome";
 import { contactCards, contactSteps } from "@/lib/site-data";
+import { assetPath } from "@/lib/paths";
 
 export default function ContactPage() {
   return (
@@ -71,7 +72,7 @@ export default function ContactPage() {
                   className="object-contain p-5"
                   fill
                   sizes="260px"
-                  src="/figma/footer-phone.webp"
+                  src={assetPath("/figma/footer-phone.webp")}
                 />
               </div>
             </div>

@@ -10,6 +10,7 @@ import {
   SiteHeader,
 } from "@/components/site-chrome";
 import { premiumProducts, type PremiumProduct } from "@/lib/site-data";
+import { assetPath } from "@/lib/paths";
 
 function PremiumProductCard({
   onDetails,
@@ -26,7 +27,7 @@ function PremiumProductCard({
           className="object-cover"
           fill
           sizes="(min-width: 1024px) 420px, 90vw"
-          src="/figma/premium-netflix.webp"
+          src={assetPath("/figma/premium-netflix.webp")}
         />
       </div>
       <div className="px-3 pb-2 pt-6">
@@ -109,7 +110,7 @@ function ProductDetailModal({
             className="object-cover"
             fill
             sizes="(min-width: 768px) 360px, 100vw"
-            src="/figma/premium-netflix.webp"
+            src={assetPath("/figma/premium-netflix.webp")}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#101923] via-transparent to-transparent md:bg-gradient-to-r" />
         </div>
