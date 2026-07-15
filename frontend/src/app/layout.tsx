@@ -7,6 +7,7 @@ const siteTitle = "Good Friend Shop";
 const siteDescription =
   "เว็บเติมเกมและร้านแอพพรีเมี่ยม Good Friend Shop เติมเกมไว ปลอดภัย และติดตามออเดอร์ได้ง่าย";
 const siteLogo = "/figma/logo-goodfriend.webp";
+const siteIcon = "/icon.png";
 
 const lineSeedSansTh = localFont({
   src: [
@@ -37,8 +38,11 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   icons: {
-    icon: [{ url: siteLogo, type: "image/webp" }],
-    shortcut: [{ url: siteLogo, type: "image/webp" }],
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: siteIcon, type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: [{ url: "/favicon.ico" }],
   },
   openGraph: {
     title: siteTitle,
