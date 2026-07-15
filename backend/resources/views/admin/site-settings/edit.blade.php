@@ -25,6 +25,8 @@
         .button { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; border: 0; border-radius: 16px; padding: 0 18px; background: var(--green); color: #05140f; font: inherit; font-weight: 900; cursor: pointer; }
         .error { color: #fca5a5; font-size: 13px; }
         .hint { color: var(--muted); font-size: 13px; font-weight: 700; }
+        .logo-preview { display: flex; width: fit-content; min-width: 160px; min-height: 64px; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 18px; padding: 12px; background: rgba(255, 255, 255, 0.05); }
+        .logo-preview img { display: block; max-width: 220px; max-height: 80px; object-fit: contain; }
         @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -41,7 +43,7 @@
             <h1>ตั้งค่าทั่วไป</h1>
             <p class="hint">แก้ข้อมูลร้านที่แสดงในหน้าแรก เช่น ชื่อเว็บ, footer, LINE, อีเมล, เบอร์โทร และ Facebook</p>
 
-            <form method="POST" action="{{ route('admin.site-settings.update') }}">
+            <form method="POST" action="{{ route('admin.site-settings.update') }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -54,9 +56,18 @@
                     <h2>{{ $groupLabels[$group] ?? $group }}</h2>
                     <div class="grid">
                         @foreach ($items as $setting)
-                            <label @if ($setting->type === 'textarea') style="grid-column: 1 / -1;" @endif>
+                            <label @if (in_array($setting->type, ['textarea', 'image'], true)) style="grid-column: 1 / -1;" @endif>
                                 {{ $setting->label }}
-                                @if ($setting->type === 'textarea')
+                                @if ($setting->type === 'image')
+                                    @if ($setting->value)
+                                        <span class="logo-preview">
+                                            <img src="{{ $setting->value }}" alt="โลโก้ปัจจุบัน">
+                                        </span>
+                                    @endif
+                                    <input name="logo_file" type="file" accept=".webp,.png,.jpg,.jpeg,image/webp,image/png,image/jpeg">
+                                    <span class="hint">แนะนำไฟล์ .webp หรือ .png พื้นหลังโปร่งใส กว้างอย่างน้อย 120px สูงอย่างน้อย 40px ขนาดไม่เกิน 2MB</span>
+                                    @error('logo_file') <span class="error">{{ $message }}</span> @enderror
+                                @elseif ($setting->type === 'textarea')
                                     <textarea name="settings[{{ $setting->key }}]">{{ old("settings.{$setting->key}", $setting->value) }}</textarea>
                                 @else
                                     <input name="settings[{{ $setting->key }}]" value="{{ old("settings.{$setting->key}", $setting->value) }}">

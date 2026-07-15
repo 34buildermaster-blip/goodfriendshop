@@ -190,12 +190,29 @@ function SectionTitle({
   );
 }
 
-function Header({ logoText = "LOGO" }: { logoText?: string }) {
+function Header({
+  logoPath,
+  logoText = "Good Friend Shop",
+}: {
+  logoPath?: string;
+  logoText?: string;
+}) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#0e0d17]/80 backdrop-blur-xl">
       <div className="mx-auto flex h-[73px] max-w-[1440px] items-center gap-5 px-5 lg:px-11">
-        <Link className="shrink-0 text-lg font-bold tracking-wide text-white" href="/">
-          {logoText}
+        <Link className="relative flex h-12 w-[154px] shrink-0 items-center text-lg font-bold tracking-wide text-white" href="/">
+          {logoPath ? (
+            <Image
+              alt={logoText}
+              className="object-contain object-left"
+              fill
+              priority
+              sizes="154px"
+              src={assetPath(logoPath)}
+            />
+          ) : (
+            logoText
+          )}
         </Link>
 
         <nav className="hidden flex-1 items-center justify-center gap-8 text-sm font-medium text-white lg:flex">
@@ -539,7 +556,7 @@ export default function Home() {
   ]);
   const [siteSettings, setSiteSettings] = useState({
     site_name: "Good Friend Shop",
-    logo_text: "LOGO",
+    logo_path: undefined as string | undefined,
     footer_tagline: "เติมเกมไวเหมือนเพื่อนรู้ใจ ราคาสบายกระเป๋าที่สุด!",
     footer_description:
       "GoodFriendShop คือเพื่อนแท้ของเกมเมอร์ พร้อมสนับสนุนให้คุณเล่นต่อได้ไม่มีสะดุด",
@@ -592,7 +609,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#0e0d17] text-white">
-      <Header logoText={siteSettings.logo_text} />
+      <Header logoPath={siteSettings.logo_path} logoText={siteSettings.site_name} />
 
       <section className="relative min-h-[860px] overflow-hidden pt-[73px]">
         {homeHeroSlides.map((slide, index) => (

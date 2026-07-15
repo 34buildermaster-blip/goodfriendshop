@@ -56,7 +56,7 @@ export type NewsItem = {
 
 export type SiteSettings = {
   site_name?: string;
-  logo_text?: string;
+  logo_path?: string;
   footer_tagline?: string;
   footer_description?: string;
   contact_line?: string;
@@ -185,6 +185,10 @@ export async function getSiteContent(): Promise<SiteContent | null> {
 
   return {
     ...data,
+    settings: {
+      ...data.settings,
+      logo_path: normalizeMediaUrl(data.settings.logo_path, ""),
+    },
     hero_slides: data.hero_slides.map((slide, index) => ({
       ...slide,
       image: normalizeMediaUrl(slide.image, index === 0 ? "/figma/hero.webp" : "/figma/news-main.webp"),

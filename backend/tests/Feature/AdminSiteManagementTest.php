@@ -21,12 +21,12 @@ class AdminSiteManagementTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.site-settings.edit'))
             ->assertOk()
-            ->assertSee('Website settings');
+            ->assertSee('Website settings')
+            ->assertSee('logo_file');
 
         $response = $this->actingAs($admin)->put(route('admin.site-settings.update'), [
             'settings' => [
                 'site_name' => 'Good Friend Test',
-                'logo_text' => 'GF',
             ],
         ]);
 
@@ -35,6 +35,7 @@ class AdminSiteManagementTest extends TestCase
             'key' => 'site_name',
             'value' => 'Good Friend Test',
         ]);
+        $this->assertDatabaseMissing('site_settings', ['key' => 'logo_text']);
     }
 
     public function test_admin_can_manage_hero_slides_and_announcements(): void

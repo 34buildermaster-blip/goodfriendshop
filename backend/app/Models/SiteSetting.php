@@ -10,7 +10,7 @@ class SiteSetting extends Model
 {
     public const DEFAULTS = [
         'site_name' => ['label' => 'ชื่อเว็บไซต์', 'value' => 'Good Friend Shop', 'type' => 'text', 'group' => 'general', 'sort_order' => 10],
-        'logo_text' => ['label' => 'ข้อความโลโก้', 'value' => 'LOGO', 'type' => 'text', 'group' => 'general', 'sort_order' => 20],
+        'logo_path' => ['label' => 'โลโก้เว็บไซต์', 'value' => null, 'type' => 'image', 'group' => 'general', 'sort_order' => 20],
         'footer_tagline' => ['label' => 'Tagline Footer', 'value' => 'เติมเกมไวเหมือนเพื่อนรู้ใจ ราคาสบายกระเป๋าที่สุด!', 'type' => 'text', 'group' => 'general', 'sort_order' => 30],
         'footer_description' => ['label' => 'คำอธิบาย Footer', 'value' => 'GoodFriendShop คือเพื่อนแท้ของเกมเมอร์ พร้อมสนับสนุนให้คุณเล่นต่อได้ไม่มีสะดุด', 'type' => 'textarea', 'group' => 'general', 'sort_order' => 40],
         'contact_line' => ['label' => 'LINE', 'value' => 'xxxxxxx', 'type' => 'text', 'group' => 'contact', 'sort_order' => 50],
@@ -21,6 +21,8 @@ class SiteSetting extends Model
 
     public static function seedDefaults(): void
     {
+        self::query()->where('key', 'logo_text')->delete();
+
         foreach (self::DEFAULTS as $key => $setting) {
             self::updateOrCreate(['key' => $key], ['key' => $key, ...$setting]);
         }
@@ -31,6 +33,7 @@ class SiteSetting extends Model
         self::seedDefaults();
 
         return self::query()
+            ->whereIn('key', array_keys(self::DEFAULTS))
             ->orderBy('sort_order')
             ->pluck('value', 'key')
             ->all();
