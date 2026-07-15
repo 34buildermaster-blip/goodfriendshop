@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import { CheckCircle2, ShoppingBag, X } from "lucide-react";
 import {
   createOrder,
@@ -190,6 +191,12 @@ export function PremiumOrderModal({
                 <p className="mt-1 text-sm text-white/70">
                   เลขออเดอร์ {order.order_number} สถานะ {order.status_label}
                 </p>
+                <Link
+                  className="mt-3 inline-flex h-10 items-center justify-center rounded-full bg-emerald-500 px-5 text-sm font-semibold text-white transition hover:bg-emerald-400"
+                  href={`/payment?order=${encodeURIComponent(order.order_number)}`}
+                >
+                  ไปหน้าชำระเงิน
+                </Link>
               </div>
             </div>
           </div>

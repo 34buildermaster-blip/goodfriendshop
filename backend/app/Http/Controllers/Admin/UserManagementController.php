@@ -18,7 +18,7 @@ class UserManagementController extends Controller
 
     public function index(): View
     {
-        $this->ensureAdminAccess();
+        $this->ensureOwnerAdmin();
 
         return view('admin.users.index', [
             'users' => User::query()
@@ -31,7 +31,7 @@ class UserManagementController extends Controller
 
     public function create(): View
     {
-        $this->ensureAdminAccess();
+        $this->ensureOwnerAdmin();
 
         return view('admin.users.form', [
             'user' => new User([
@@ -42,13 +42,13 @@ class UserManagementController extends Controller
             'statusLabels' => $this->statusLabels(),
             'action' => route('admin.users.store'),
             'method' => 'POST',
-            'title' => 'เพิ่มสมาชิก',
+            'title' => 'Add member',
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $this->ensureAdminAccess();
+        $this->ensureOwnerAdmin();
 
         $data = $this->validatedUserData($request);
         $data['password'] = Hash::make($data['password']);
@@ -57,12 +57,12 @@ class UserManagementController extends Controller
 
         return redirect()
             ->route('admin.users.index')
-            ->with('status', 'เพิ่มสมาชิกเรียบร้อยแล้ว');
+            ->with('status', 'Member created successfully.');
     }
 
     public function edit(User $user): View
     {
-        $this->ensureAdminAccess();
+        $this->ensureOwnerAdmin();
 
         return view('admin.users.form', [
             'user' => $user,
@@ -70,13 +70,13 @@ class UserManagementController extends Controller
             'statusLabels' => $this->statusLabels(),
             'action' => route('admin.users.update', $user),
             'method' => 'PUT',
-            'title' => 'แก้ไขสมาชิก',
+            'title' => 'Edit member',
         ]);
     }
 
     public function update(Request $request, User $user): RedirectResponse
     {
-        $this->ensureAdminAccess();
+        $this->ensureOwnerAdmin();
 
         $data = $this->validatedUserData($request, $user);
 
@@ -90,20 +90,20 @@ class UserManagementController extends Controller
 
         return redirect()
             ->route('admin.users.index')
-            ->with('status', 'บันทึกข้อมูลสมาชิกเรียบร้อยแล้ว');
+            ->with('status', 'Member updated successfully.');
     }
 
     public function destroy(User $user): RedirectResponse
     {
-        $this->ensureAdminAccess();
+        $this->ensureOwnerAdmin();
 
-        abort_if($user->is(auth()->user()), 422, 'ไม่สามารถลบบัญชีที่กำลังใช้งานอยู่ได้');
+        abort_if($user->is(auth()->user()), 422, 'You cannot delete the account currently in use.');
 
         $user->delete();
 
         return redirect()
             ->route('admin.users.index')
-            ->with('status', 'ลบสมาชิกเรียบร้อยแล้ว');
+            ->with('status', 'Member deleted successfully.');
     }
 
     private function validatedUserData(Request $request, ?User $user = null): array
@@ -131,16 +131,22 @@ class UserManagementController extends Controller
     private function roleLabels(): array
     {
         return [
-            User::ROLE_CUSTOMER => 'ลูกค้า',
-            User::ROLE_ADMIN => 'ผู้ดูแล',
+            User::ROLE_CUSTOMER => 'Customer',
+            User::ROLE_STAFF => 'Staff',
+            User::ROLE_ADMIN => 'Admin',
         ];
     }
 
     private function statusLabels(): array
     {
         return [
-            User::STATUS_ACTIVE => 'ใช้งานได้',
-            User::STATUS_SUSPENDED => 'ระงับใช้งาน',
+            User::STATUS_ACTIVE => 'Active',
+            User::STATUS_SUSPENDED => 'Suspended',
         ];
+    }
+
+    private function ensureOwnerAdmin(): void
+    {
+        abort_unless(auth()->user()?->isOwnerAdmin(), 403);
     }
 }

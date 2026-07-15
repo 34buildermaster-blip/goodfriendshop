@@ -27,8 +27,16 @@ export async function generateMetadata({
   const article = await getNewsArticle(slug);
 
   return {
-    title: article ? `${article.title} | Good Friend Shop` : "News | Good Friend Shop",
-    description: article?.excerpt,
+    title: article ? article.meta_title || `${article.title} | Good Friend Shop` : "News | Good Friend Shop",
+    description: article?.meta_description || article?.excerpt,
+    openGraph: article
+      ? {
+          title: article.meta_title || article.title,
+          description: article.meta_description || article.excerpt,
+          images: [{ url: article.og_image || article.image }],
+          type: "article",
+        }
+      : undefined,
   };
 }
 

@@ -19,8 +19,18 @@ class OrderController extends Controller
         $this->ensureAdminAccess();
 
         $orders = Order::query()
-            ->with(['user', 'game', 'package'])
+            ->with(['user', 'game', 'package', 'premiumApp'])
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
+            ->when($request->filled('payment_status'), fn ($query) => $query->where('payment_status', $request->string('payment_status')))
+            ->when($request->filled('type'), function ($query) use ($request) {
+                if ($request->string('type')->toString() === 'premium_app') {
+                    $query->whereNotNull('premium_app_id');
+                }
+
+                if ($request->string('type')->toString() === 'game') {
+                    $query->whereNotNull('game_package_id');
+                }
+            })
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = '%'.$request->string('search')->trim().'%';
 
@@ -41,6 +51,7 @@ class OrderController extends Controller
         return view('admin.orders.index', [
             'orders' => $orders,
             'statusLabels' => Order::statusLabels(),
+            'paymentStatusLabels' => Order::paymentStatusLabels(),
         ]);
     }
 
@@ -49,8 +60,9 @@ class OrderController extends Controller
         $this->ensureAdminAccess();
 
         return view('admin.orders.edit', [
-            'order' => $order->load(['user', 'game', 'package']),
+            'order' => $order->load(['user', 'game', 'package', 'premiumApp']),
             'statusLabels' => Order::statusLabels(),
+            'paymentStatusLabels' => Order::paymentStatusLabels(),
         ]);
     }
 
@@ -60,8 +72,19 @@ class OrderController extends Controller
 
         $data = $request->validate([
             'status' => ['required', Rule::in(array_keys(Order::statusLabels()))],
+            'payment_method' => ['nullable', 'string', 'max:40'],
+            'payment_status' => ['nullable', Rule::in(array_keys(Order::paymentStatusLabels()))],
+            'payment_reference' => ['nullable', 'string', 'max:255'],
+            'payment_note' => ['nullable', 'string', 'max:5000'],
+            'paid_at' => ['nullable', 'date'],
             'admin_note' => ['nullable', 'string', 'max:5000'],
         ]);
+
+        $data['payment_status'] = $data['payment_status'] ?? $order->payment_status ?? Order::PAYMENT_UNPAID;
+
+        if ($data['payment_status'] === Order::PAYMENT_PAID && blank($data['paid_at'] ?? null)) {
+            $data['paid_at'] = now();
+        }
 
         $order->update($data);
 

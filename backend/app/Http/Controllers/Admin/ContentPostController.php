@@ -107,7 +107,17 @@ class ContentPostController extends Controller
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['nullable', 'string', 'max:20000'],
             'cover_image_path' => ['nullable', 'string', 'max:255'],
+            'meta_title' => ['nullable', 'string', 'max:180'],
+            'meta_description' => ['nullable', 'string', 'max:500'],
+            'og_image_path' => ['nullable', 'string', 'max:255'],
             'cover_image_file' => [
+                'nullable',
+                'image',
+                'mimes:webp,png,jpg,jpeg',
+                'max:3072',
+                'dimensions:min_width=800,min_height=420,max_width=3000,max_height=2000',
+            ],
+            'og_image_file' => [
                 'nullable',
                 'image',
                 'mimes:webp,png,jpg,jpeg',
@@ -129,7 +139,14 @@ class ContentPostController extends Controller
             $data['cover_image_path'] = $file->storeAs('content-posts', $filename, 'public');
         }
 
-        unset($data['cover_image_file']);
+        if ($request->hasFile('og_image_file')) {
+            $file = $request->file('og_image_file');
+            $filename = $data['slug'].'-og-'.Str::random(8).'.'.$file->extension();
+
+            $data['og_image_path'] = $file->storeAs('content-posts', $filename, 'public');
+        }
+
+        unset($data['cover_image_file'], $data['og_image_file']);
 
         return $data;
     }

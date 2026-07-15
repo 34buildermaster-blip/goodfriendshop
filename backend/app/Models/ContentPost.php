@@ -16,6 +16,9 @@ use Illuminate\Support\Str;
     'excerpt',
     'content',
     'cover_image_path',
+    'meta_title',
+    'meta_description',
+    'og_image_path',
     'published_at',
     'status',
     'sort_order',
@@ -45,6 +48,19 @@ class ContentPost extends Model
         }
 
         return Storage::url($this->cover_image_path);
+    }
+
+    public function ogImageUrl(): ?string
+    {
+        if (blank($this->og_image_path)) {
+            return $this->coverImageUrl();
+        }
+
+        if (Str::startsWith($this->og_image_path, ['http://', 'https://', '/'])) {
+            return $this->og_image_path;
+        }
+
+        return Storage::url($this->og_image_path);
     }
 
     protected function casts(): array

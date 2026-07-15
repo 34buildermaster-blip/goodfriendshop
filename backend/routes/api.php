@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 Route::options('/{any}', fn () => response()->noContent())
     ->where('any', '.*')
@@ -102,6 +103,12 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
         'package_name' => $order->package_name,
         'price' => (float) $order->price,
         'currency' => $order->currency,
+        'payment_method' => $order->payment_method,
+        'payment_status' => $order->payment_status ?? Order::PAYMENT_UNPAID,
+        'payment_status_label' => Order::paymentStatusLabels()[$order->payment_status ?? Order::PAYMENT_UNPAID] ?? ($order->payment_status ?? Order::PAYMENT_UNPAID),
+        'payment_reference' => $order->payment_reference,
+        'payment_note' => $order->payment_note,
+        'paid_at' => $order->paid_at?->toIso8601String(),
         'status' => $order->status,
         'status_label' => Order::statusLabels()[$order->status] ?? $order->status,
         'customer_note' => $order->customer_note,
@@ -186,6 +193,30 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
         $user->update($data);
 
         return response()->json(['data' => $userPayload($user->refresh())]);
+    });
+
+    Route::patch('/auth/me/password', function (Request $request) use ($resolveApiUser) {
+        $user = $resolveApiUser($request);
+
+        abort_unless($user, 401);
+
+        $data = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'confirmed', Password::min(8)],
+        ]);
+
+        if (! Hash::check($data['current_password'], $user->password)) {
+            return response()->json([
+                'message' => 'Current password is incorrect.',
+                'errors' => ['current_password' => ['Current password is incorrect.']],
+            ], 422);
+        }
+
+        $user->forceFill([
+            'password' => Hash::make($data['password']),
+        ])->save();
+
+        return response()->json(['data' => ['ok' => true]]);
     });
 
     Route::post('/auth/me/avatar', function (Request $request) use ($resolveApiUser, $userPayload) {
@@ -383,6 +414,7 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
             'package_name' => $package?->name ?? $premiumApp->name,
             'price' => $package?->price ?? $premiumApp->price,
             'currency' => $package?->currency ?? $premiumApp->currency,
+            'payment_status' => Order::PAYMENT_UNPAID,
             'status' => Order::STATUS_PENDING,
             'customer_note' => $data['customer_note'] ?? null,
         ]);
@@ -460,6 +492,9 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
                 'type' => $post->type,
                 'featured' => $index === 0,
                 'excerpt' => $post->excerpt ?: str($post->content)->stripTags()->limit(160)->toString(),
+                'meta_title' => $post->meta_title,
+                'meta_description' => $post->meta_description,
+                'og_image' => $post->ogImageUrl(),
             ])
             ->values();
 
@@ -479,6 +514,9 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
                 'type' => $contentPost->type,
                 'excerpt' => $contentPost->excerpt ?: str($contentPost->content)->stripTags()->limit(160)->toString(),
                 'content' => $contentPost->content,
+                'meta_title' => $contentPost->meta_title,
+                'meta_description' => $contentPost->meta_description,
+                'og_image' => $contentPost->ogImageUrl(),
             ],
         ]);
     });
@@ -486,9 +524,24 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
     Route::get('/payment-methods', function () {
         return response()->json([
             'data' => [
-                ['id' => 'promptpay', 'name' => 'PromptPay', 'status' => 'active'],
-                ['id' => 'truemoney', 'name' => 'TrueMoney', 'status' => 'draft'],
-                ['id' => 'bank-transfer', 'name' => 'Bank Transfer', 'status' => 'draft'],
+                [
+                    'id' => 'wepay',
+                    'name' => 'Wepay',
+                    'status' => 'pending_api',
+                    'description' => 'Payment gateway placeholder. Ready for API keys and webhook callback.',
+                ],
+                [
+                    'id' => 'promptpay',
+                    'name' => 'PromptPay',
+                    'status' => 'manual_ready',
+                    'description' => 'Manual payment placeholder while waiting for Wepay.',
+                ],
+                [
+                    'id' => 'bank-transfer',
+                    'name' => 'Bank Transfer',
+                    'status' => 'draft',
+                    'description' => 'Optional manual transfer channel.',
+                ],
             ],
         ]);
     });

@@ -15,6 +15,7 @@ export const navItems = [
   { label: "แอพพรีเมี่ยมทั้งหมด", href: "/premium" },
   { label: "สินค้าอื่นๆ", href: "/products" },
   { label: "เติมเกมส์ออนไลน์", href: "/games" },
+  { label: "ชำระเงิน", href: "/payment" },
   { label: "กิจกรรม", href: "/news" },
   { label: "ติดต่อเรา", href: "/contact" },
 ];

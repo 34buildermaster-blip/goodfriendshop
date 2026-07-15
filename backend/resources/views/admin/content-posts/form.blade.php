@@ -10,11 +10,12 @@
         :root { --bg: #050b0a; --panel: rgba(8, 17, 15, 0.94); --line: rgba(255, 255, 255, 0.1); --green: #66edbd; --muted: rgba(255, 255, 255, 0.62); }
         * { box-sizing: border-box; }
         body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 50% -10%, rgba(56, 189, 148, 0.18), transparent 38rem), var(--bg); color: #fff; font-family: "LINE Seed Sans TH", "Leelawadee UI", Tahoma, Arial, sans-serif; }
-        main { width: min(860px, 100%); margin: 0 auto; padding: 28px 20px 56px; }
+        main { width: min(920px, 100%); margin: 0 auto; padding: 28px 20px 56px; }
         .card { border: 1px solid var(--line); border-radius: 30px; padding: 24px; background: var(--panel); box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22); }
         .kicker { margin: 0; color: rgba(102, 237, 189, 0.78); font-size: 12px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; }
         h1 { margin: 8px 0 22px; font-size: clamp(28px, 5vw, 40px); }
-        label { display: grid; gap: 8px; margin-top: 16px; color: rgba(255, 255, 255, 0.84); font-size: 14px; font-weight: 900; }
+        h2 { margin: 28px 0 0; font-size: 20px; }
+        label, .editor-field { display: grid; gap: 8px; margin-top: 16px; color: rgba(255, 255, 255, 0.84); font-size: 14px; font-weight: 900; }
         input, select, textarea { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 0 16px; background: rgba(255, 255, 255, 0.04); color: #fff; font: inherit; outline: none; }
         input, select { height: 48px; }
         textarea { min-height: 150px; padding-top: 14px; resize: vertical; }
@@ -26,7 +27,6 @@
         .button.secondary { border: 1px solid var(--line); background: rgba(255, 255, 255, 0.055); color: #fff; }
         .error { color: #fca5a5; font-size: 13px; }
         .hint { color: var(--muted); font-size: 13px; font-weight: 700; }
-        .editor-field { display: grid; gap: 8px; margin-top: 16px; color: rgba(255, 255, 255, 0.84); font-size: 14px; font-weight: 900; }
         .tox.tox-tinymce { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
         @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
     </style>
@@ -68,10 +68,11 @@
                     </label>
                 </div>
 
+                <h2>รูปภาพ</h2>
                 <label>
                     รูปปก
                     <input name="cover_image_file" type="file" accept=".webp,.png,.jpg,.jpeg,image/webp,image/png,image/jpeg">
-                    <span class="hint">แนะนำ 1200x630px รองรับ .webp, .png, .jpg, .jpeg ขนาดไฟล์ไม่เกิน 3MB</span>
+                    <span class="hint">แนะนำ 1200x630px รองรับ .webp, .png, .jpg, .jpeg ไม่เกิน 3MB</span>
                     @if ($post->coverImageUrl())
                         <span class="hint">รูปปัจจุบัน: {{ $post->cover_image_path }}</span>
                     @endif
@@ -81,8 +82,37 @@
                 <label>
                     Path รูปปก
                     <input name="cover_image_path" value="{{ old('cover_image_path', $post->cover_image_path) }}" placeholder="/figma/news-cover.webp">
-                    <span class="hint">ใช้กรณีมีรูปจากระบบเดิมหรือ CDN ถ้าอัปโหลดไฟล์ใหม่ ระบบจะใช้ไฟล์ที่อัปโหลดแทน</span>
                     @error('cover_image_path') <span class="error">{{ $message }}</span> @enderror
+                </label>
+
+                <h2>SEO</h2>
+                <div class="grid">
+                    <label>
+                        SEO Title
+                        <input name="meta_title" value="{{ old('meta_title', $post->meta_title) }}" maxlength="180" placeholder="เว้นว่างเพื่อใช้หัวข้อบทความ">
+                        @error('meta_title') <span class="error">{{ $message }}</span> @enderror
+                    </label>
+                    <label>
+                        SEO Description
+                        <input name="meta_description" value="{{ old('meta_description', $post->meta_description) }}" maxlength="500" placeholder="คำอธิบายสำหรับ Google และ Social share">
+                        @error('meta_description') <span class="error">{{ $message }}</span> @enderror
+                    </label>
+                </div>
+
+                <label>
+                    OG Image
+                    <input name="og_image_file" type="file" accept=".webp,.png,.jpg,.jpeg,image/webp,image/png,image/jpeg">
+                    <span class="hint">แนะนำ 1200x630px ถ้าไม่ใส่จะใช้รูปปก</span>
+                    @if ($post->ogImageUrl())
+                        <span class="hint">รูป Social ปัจจุบัน: {{ $post->og_image_path ?: $post->cover_image_path }}</span>
+                    @endif
+                    @error('og_image_file') <span class="error">{{ $message }}</span> @enderror
+                </label>
+
+                <label>
+                    OG Image Path
+                    <input name="og_image_path" value="{{ old('og_image_path', $post->og_image_path) }}" placeholder="/figma/news-share.webp">
+                    @error('og_image_path') <span class="error">{{ $message }}</span> @enderror
                 </label>
 
                 <label>
@@ -94,7 +124,7 @@
                 <label class="editor-field">
                     เนื้อหา
                     <textarea id="content-editor" name="content">{{ old('content', $post->content) }}</textarea>
-                    <span class="hint">ใช้หัวข้อ H2/H3, ลิงก์, ตาราง และรายการ bullet เพื่อจัดบทความให้อ่านง่ายและพร้อมทำ SEO</span>
+                    <span class="hint">ใช้ H2/H3, ลิงก์, ตาราง และ bullet เพื่อจัดบทความให้อ่านง่ายและพร้อมทำ SEO</span>
                     @error('content') <span class="error">{{ $message }}</span> @enderror
                 </label>
 

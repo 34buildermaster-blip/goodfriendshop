@@ -24,6 +24,11 @@ use Illuminate\Support\Str;
     'package_name',
     'price',
     'currency',
+    'payment_method',
+    'payment_status',
+    'payment_reference',
+    'payment_note',
+    'paid_at',
     'status',
     'customer_note',
     'admin_note',
@@ -42,6 +47,16 @@ class Order extends Model
 
     public const STATUS_CANCELLED = 'cancelled';
 
+    public const PAYMENT_UNPAID = 'unpaid';
+
+    public const PAYMENT_AWAITING = 'awaiting_payment';
+
+    public const PAYMENT_PAID = 'paid';
+
+    public const PAYMENT_FAILED = 'failed';
+
+    public const PAYMENT_REFUNDED = 'refunded';
+
     public static function statusLabels(): array
     {
         return [
@@ -50,6 +65,17 @@ class Order extends Model
             self::STATUS_PROCESSING => 'กำลังดำเนินการ',
             self::STATUS_COMPLETED => 'สำเร็จ',
             self::STATUS_CANCELLED => 'ยกเลิก',
+        ];
+    }
+
+    public static function paymentStatusLabels(): array
+    {
+        return [
+            self::PAYMENT_UNPAID => 'Unpaid',
+            self::PAYMENT_AWAITING => 'Awaiting payment',
+            self::PAYMENT_PAID => 'Paid',
+            self::PAYMENT_FAILED => 'Failed',
+            self::PAYMENT_REFUNDED => 'Refunded',
         ];
     }
 
@@ -93,6 +119,7 @@ class Order extends Model
         return [
             'extra_fields' => 'array',
             'price' => 'decimal:2',
+            'paid_at' => 'datetime',
         ];
     }
 }

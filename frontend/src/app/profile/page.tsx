@@ -38,6 +38,7 @@ import {
   logoutCustomer,
   uploadCurrentCustomerAvatar,
   updateCurrentCustomer,
+  updateCurrentCustomerPassword,
   type CustomerUser,
   type OrderItem,
 } from "@/lib/api";
@@ -94,6 +95,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<ProfileTab>("overview");
   const [editingProfile, setEditingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
   const [profileError, setProfileError] = useState("");
@@ -104,6 +106,11 @@ export default function ProfilePage() {
     email: "",
     phone: "",
     line_id: "",
+  });
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: "",
+    password: "",
+    password_confirmation: "",
   });
 
   useEffect(() => {
@@ -288,6 +295,33 @@ export default function ProfilePage() {
       setProfileError(caught instanceof Error ? caught.message : "อัปโหลดรูปโปรไฟล์ไม่สำเร็จ");
     } finally {
       setAvatarUploading(false);
+    }
+  }
+
+  async function handleChangePassword() {
+    const token = window.localStorage.getItem("gfs_token");
+
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    setSavingPassword(true);
+    setProfileError("");
+    setProfileMessage("");
+
+    try {
+      await updateCurrentCustomerPassword(token, passwordForm);
+      setPasswordForm({
+        current_password: "",
+        password: "",
+        password_confirmation: "",
+      });
+      setProfileMessage("เปลี่ยนรหัสผ่านเรียบร้อยแล้ว");
+    } catch (caught) {
+      setProfileError(caught instanceof Error ? caught.message : "เปลี่ยนรหัสผ่านไม่สำเร็จ");
+    } finally {
+      setSavingPassword(false);
     }
   }
 
@@ -606,6 +640,53 @@ export default function ProfilePage() {
                         <SummaryCard icon={WalletCards} label="รอตรวจสอบ" value={String(orderSummary.pending)} />
                         <SummaryCard icon={BadgeCheck} label="สำเร็จแล้ว" value={String(orderSummary.completed)} />
                       </div>
+
+                      <section className="mt-6 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+                        <div className="flex items-start gap-3">
+                          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-emerald-500/12 text-emerald-300">
+                            <ShieldCheck size={20} />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-bold text-white">เปลี่ยนรหัสผ่าน</h3>
+                            <p className="mt-1 text-sm leading-6 text-white/58">
+                              ใช้สำหรับเพิ่มความปลอดภัยของบัญชีสมาชิก
+                            </p>
+                          </div>
+                        </div>
+                        <div className="mt-5 grid gap-4 md:grid-cols-3">
+                          <ProfileInput
+                            label="รหัสผ่านปัจจุบัน"
+                            onChange={(value) => setPasswordForm((current) => ({ ...current, current_password: value }))}
+                            type="password"
+                            value={passwordForm.current_password}
+                          />
+                          <ProfileInput
+                            label="รหัสผ่านใหม่"
+                            onChange={(value) => setPasswordForm((current) => ({ ...current, password: value }))}
+                            type="password"
+                            value={passwordForm.password}
+                          />
+                          <ProfileInput
+                            label="ยืนยันรหัสผ่านใหม่"
+                            onChange={(value) => setPasswordForm((current) => ({ ...current, password_confirmation: value }))}
+                            type="password"
+                            value={passwordForm.password_confirmation}
+                          />
+                        </div>
+                        <button
+                          className="mt-5 flex h-11 items-center justify-center rounded-full bg-emerald-500 px-6 text-sm font-semibold text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+                          disabled={
+                            savingPassword ||
+                            !passwordForm.current_password ||
+                            !passwordForm.password ||
+                            !passwordForm.password_confirmation
+                          }
+                          onClick={handleChangePassword}
+                          type="button"
+                        >
+                          {savingPassword ? "กำลังเปลี่ยน..." : "บันทึกรหัสผ่านใหม่"}
+                        </button>
+                      </section>
                     </div>
                   ) : null}
 

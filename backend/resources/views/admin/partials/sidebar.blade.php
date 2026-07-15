@@ -130,6 +130,7 @@
             </div>
         </details>
 
+        @if (auth()->user()?->isOwnerAdmin())
         <details class="admin-nav-group" @if ($usersActive) open @endif>
             <summary class="admin-nav-link admin-nav-summary {{ $usersActive ? 'is-active' : '' }}" title="สมาชิก">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -145,6 +146,7 @@
                 <a class="admin-subnav-link {{ request()->routeIs('admin.users.create') ? 'is-active' : '' }}" href="{{ route('admin.users.create') }}">เพิ่มสมาชิก</a>
             </div>
         </details>
+        @endif
     </nav>
 
     <form class="admin-sidebar-logout" method="POST" action="{{ route('logout') }}">

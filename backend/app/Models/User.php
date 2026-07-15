@@ -19,6 +19,8 @@ class User extends Authenticatable
 {
     public const ROLE_ADMIN = 'admin';
 
+    public const ROLE_STAFF = 'staff';
+
     public const ROLE_CUSTOMER = 'customer';
 
     public const STATUS_ACTIVE = 'active';
@@ -29,6 +31,11 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public function isAdmin(): bool
+    {
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_STAFF], true);
+    }
+
+    public function isOwnerAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
     }

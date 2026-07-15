@@ -62,6 +62,12 @@ export type OrderItem = {
   package_name: string;
   price: number;
   currency: string;
+  payment_method?: string | null;
+  payment_status?: string | null;
+  payment_status_label?: string | null;
+  payment_reference?: string | null;
+  payment_note?: string | null;
+  paid_at?: string | null;
   status: string;
   status_label: string;
   customer_note?: string | null;
@@ -104,6 +110,16 @@ export type NewsItem = {
   featured?: boolean;
   excerpt: string;
   content?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  og_image?: string | null;
+};
+
+export type PaymentMethodItem = {
+  id: string;
+  name: string;
+  status: string;
+  description?: string | null;
 };
 
 export type SiteSettings = {
@@ -311,6 +327,17 @@ export async function updateCurrentCustomer(
   return normalizeCustomerUser(await sendData<CustomerUser>("/auth/me", payload, token, "PATCH"));
 }
 
+export async function updateCurrentCustomerPassword(
+  token: string,
+  payload: {
+    current_password: string;
+    password: string;
+    password_confirmation: string;
+  },
+) {
+  return sendData<{ ok: boolean }>("/auth/me/password", payload, token, "PATCH");
+}
+
 export async function uploadCurrentCustomerAvatar(token: string, file: File) {
   const body = new FormData();
   body.append("avatar", file);
@@ -365,7 +392,12 @@ export async function getNewsArticle(slug: string): Promise<NewsItem | null> {
   return {
     ...data,
     image: normalizeMediaUrl(data.image, fallbackArticle?.image ?? "/figma/news-main.webp"),
+    og_image: normalizeMediaUrl(data.og_image, data.image),
   };
+}
+
+export async function getPaymentMethods(): Promise<PaymentMethodItem[]> {
+  return (await requestData<PaymentMethodItem[]>("/payment-methods")) ?? [];
 }
 
 export async function getSiteContent(): Promise<SiteContent | null> {
