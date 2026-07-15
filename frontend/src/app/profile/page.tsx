@@ -220,15 +220,15 @@ export default function ProfilePage() {
 
             {user ? (
               <>
-                <section className="overflow-hidden rounded-[32px] border border-white/10 bg-white text-[#111827] shadow-2xl shadow-black/20">
-                  <div className="border-b border-slate-200 bg-[#173c68] px-5 pt-4">
+                <section className="overflow-hidden rounded-[32px] border border-emerald-300/15 bg-[#111821]/92 text-white shadow-2xl shadow-black/20">
+                  <div className="border-b border-white/10 bg-[#0c151e] px-5 pt-4">
                     <div className="flex flex-wrap gap-2">
                       {tabs.map(({ id, icon: Icon, label }) => (
                         <button
                           className={`flex h-11 items-center gap-2 rounded-t-2xl px-4 text-sm font-semibold transition ${
                             activeTab === id
-                              ? "bg-white text-[#173c68]"
-                              : "bg-white/10 text-white hover:bg-white/18"
+                              ? "bg-emerald-400 text-[#06140f]"
+                              : "bg-white/[0.06] text-white/74 hover:bg-white/12 hover:text-white"
                           }`}
                           key={id}
                           onClick={() => setActiveTab(id)}
@@ -247,47 +247,47 @@ export default function ProfilePage() {
                         {initials(user.name)}
                       </div>
                       <div className="min-w-0">
-                        <h1 className="truncate text-3xl font-bold text-slate-950">{user.name}</h1>
-                        <p className="mt-2 text-sm font-semibold text-slate-500">UID</p>
-                        <p className="mt-1 break-all text-sm text-slate-600">GF-{String(user.id).padStart(6, "0")}</p>
+                        <h1 className="truncate text-3xl font-bold text-white">{user.name}</h1>
+                        <p className="mt-2 text-sm font-semibold text-emerald-300">UID</p>
+                        <p className="mt-1 break-all text-sm text-white/58">GF-{String(user.id).padStart(6, "0")}</p>
                       </div>
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-3">
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
                         <div className="flex items-center gap-2 text-emerald-600">
                           <BadgeCheck size={18} />
                           <span className="text-xs font-bold uppercase tracking-[0.1em]">Status</span>
                         </div>
-                        <p className="mt-2 text-lg font-bold text-slate-950">เปิดใช้งาน</p>
+                        <p className="mt-2 text-lg font-bold text-white">เปิดใช้งาน</p>
                       </div>
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
                         <div className="flex items-center gap-2 text-sky-600">
                           <Mail size={18} />
                           <span className="text-xs font-bold uppercase tracking-[0.1em]">Email</span>
                         </div>
-                        <p className="mt-2 truncate text-lg font-bold text-slate-950">{user.email}</p>
+                        <p className="mt-2 truncate text-lg font-bold text-white">{user.email}</p>
                       </div>
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
                         <div className="flex items-center gap-2 text-violet-600">
                           <ShieldCheck size={18} />
                           <span className="text-xs font-bold uppercase tracking-[0.1em]">Role</span>
                         </div>
-                        <p className="mt-2 text-lg font-bold text-slate-950">Customer</p>
+                        <p className="mt-2 text-lg font-bold text-white">Customer</p>
                       </div>
                     </div>
                   </div>
                 </section>
 
-                <section className="mt-6 rounded-[32px] border border-white/10 bg-white p-5 text-[#111827] shadow-2xl shadow-black/15 lg:p-7">
+                <section className="mt-6 rounded-[32px] border border-emerald-300/15 bg-[#111821]/92 p-5 text-white shadow-2xl shadow-black/15 lg:p-7">
                   {activeTab === "overview" ? (
                     <div>
                       <div className="flex items-center justify-between gap-4">
                         <div>
                           <h2 className="text-2xl font-bold">ข้อมูลส่วนตัว</h2>
-                          <p className="mt-1 text-sm text-slate-500">ข้อมูลหลักของบัญชีสมาชิก</p>
+                          <p className="mt-1 text-sm text-white/58">ข้อมูลหลักของบัญชีสมาชิก</p>
                         </div>
-                        <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-500">
+                        <span className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-white/58">
                           แก้ไขเร็ว ๆ นี้
                         </span>
                       </div>
@@ -310,7 +310,7 @@ export default function ProfilePage() {
                   {activeTab === "contact" ? (
                     <div>
                       <h2 className="text-2xl font-bold">ช่องทางติดต่อ</h2>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-white/58">
                         ใช้สำหรับติดต่อกลับและแจ้งสถานะรายการในอนาคต
                       </p>
                       <div className="mt-6 grid gap-4 md:grid-cols-3">
@@ -318,7 +318,7 @@ export default function ProfilePage() {
                         <ContactField icon={Mail} label="อีเมลรับข้อมูล" value={user.email} />
                         <ContactField icon={MessageCircle} label="บัญชี LINE" value={user.line_id ?? "ยังไม่ได้ผูก"} />
                       </div>
-                      <div className="mt-5 rounded-2xl bg-amber-50 p-4 text-sm leading-6 text-amber-700">
+                      <div className="mt-5 rounded-2xl border border-amber-300/20 bg-amber-400/10 p-4 text-sm leading-6 text-amber-100">
                         หากต้องชำระผ่านระบบอัตโนมัติหรือ Wepay ภายหลัง ควรเติมเบอร์โทรและ LINE ให้ครบก่อนเปิดใช้งานจริง
                       </div>
                     </div>
@@ -329,7 +329,7 @@ export default function ProfilePage() {
                       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                         <div>
                           <h2 className="text-2xl font-bold">ประวัติออเดอร์</h2>
-                          <p className="mt-1 text-sm text-slate-500">รายการสั่งซื้อทั้งหมดของบัญชีนี้</p>
+                          <p className="mt-1 text-sm text-white/58">รายการสั่งซื้อทั้งหมดของบัญชีนี้</p>
                         </div>
                         <Link
                           className="flex h-11 items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 text-sm font-semibold text-white"
@@ -341,29 +341,29 @@ export default function ProfilePage() {
                       </div>
 
                       {orders.length === 0 ? (
-                        <div className="mt-6 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                          <p className="text-lg font-bold text-slate-900">ยังไม่มีออเดอร์</p>
-                          <p className="mt-2 text-sm text-slate-500">เมื่อสั่งซื้อแล้ว รายการจะมาแสดงตรงนี้</p>
+                        <div className="mt-6 rounded-3xl border border-dashed border-white/15 bg-white/[0.04] p-8 text-center">
+                          <p className="text-lg font-bold text-white">ยังไม่มีออเดอร์</p>
+                          <p className="mt-2 text-sm text-white/58">เมื่อสั่งซื้อแล้ว รายการจะมาแสดงตรงนี้</p>
                         </div>
                       ) : (
-                        <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200">
+                        <div className="mt-6 overflow-hidden rounded-3xl border border-white/10">
                           {orders.map((order) => (
                             <article
-                              className="grid gap-4 border-b border-slate-200 p-4 last:border-b-0 md:grid-cols-[1fr_auto_auto]"
+                              className="grid gap-4 border-b border-white/10 bg-white/[0.03] p-4 last:border-b-0 md:grid-cols-[1fr_auto_auto]"
                               key={order.order_number}
                             >
                               <div>
-                                <p className="font-bold text-slate-950">{order.order_number}</p>
-                                <p className="mt-1 text-sm text-slate-500">
+                                <p className="font-bold text-white">{order.order_number}</p>
+                                <p className="mt-1 text-sm text-white/58">
                                   {order.game_name} / {order.package_name}
                                 </p>
-                                <p className="mt-1 text-sm text-slate-400">UID: {order.player_identifier}</p>
+                                <p className="mt-1 text-sm text-white/42">UID: {order.player_identifier}</p>
                               </div>
                               <div className="md:text-right">
-                                <p className="font-bold text-slate-950">
+                                <p className="font-bold text-[#ffc012]">
                                   {order.currency} {Number(order.price).toFixed(2)}
                                 </p>
-                                <p className="mt-1 text-xs text-slate-400">
+                                <p className="mt-1 text-xs text-white/42">
                                   {order.created_at ? new Date(order.created_at).toLocaleDateString("th-TH") : "-"}
                                 </p>
                               </div>
@@ -382,7 +382,7 @@ export default function ProfilePage() {
                   {activeTab === "payment" ? (
                     <div>
                       <h2 className="text-2xl font-bold">ช่องทางชำระเงิน</h2>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-white/58">
                         เตรียมพื้นที่ไว้สำหรับเชื่อม Wepay และข้อมูลชำระเงินในขั้นถัดไป
                       </p>
                       <div className="mt-6 grid gap-4 md:grid-cols-3">
@@ -405,9 +405,9 @@ export default function ProfilePage() {
 
 function InfoField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-      <p className="text-sm font-semibold text-slate-500">{label}</p>
-      <p className="mt-2 min-h-6 break-words text-base font-bold text-slate-950">{value}</p>
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+      <p className="text-sm font-semibold text-emerald-300">{label}</p>
+      <p className="mt-2 min-h-6 break-words text-base font-bold text-white">{value}</p>
     </div>
   );
 }
@@ -422,12 +422,12 @@ function SummaryCard({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-sm shadow-black/10">
       <div className="flex items-center gap-2 text-emerald-600">
         <Icon size={18} />
         <span className="text-sm font-semibold">{label}</span>
       </div>
-      <p className="mt-3 text-3xl font-bold text-slate-950">{value}</p>
+      <p className="mt-3 text-3xl font-bold text-white">{value}</p>
     </div>
   );
 }
@@ -442,29 +442,29 @@ function ContactField({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-      <div className="flex items-center gap-2 text-slate-500">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+      <div className="flex items-center gap-2 text-emerald-300">
         <Icon size={18} />
         <span className="text-sm font-semibold">{label}</span>
       </div>
-      <p className="mt-3 min-h-6 break-words font-bold text-slate-950">{value}</p>
+      <p className="mt-3 min-h-6 break-words font-bold text-white">{value}</p>
     </div>
   );
 }
 
 function PaymentCard({ status, title }: { status: string; title: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-500/12 text-emerald-600">
           <IdCard size={20} />
         </div>
-        <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-500">
+        <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-bold text-white/58">
           {status}
         </span>
       </div>
-      <p className="mt-4 text-lg font-bold text-slate-950">{title}</p>
-      <p className="mt-1 text-sm text-slate-500">จะเปิดใช้งานเมื่อเชื่อมระบบชำระเงินจริง</p>
+      <p className="mt-4 text-lg font-bold text-white">{title}</p>
+      <p className="mt-1 text-sm text-white/58">จะเปิดใช้งานเมื่อเชื่อมระบบชำระเงินจริง</p>
     </div>
   );
 }
