@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\ContentPostController;
 use App\Http\Controllers\Admin\GamePackageController;
 use App\Http\Controllers\Admin\GameProductController;
+use App\Http\Controllers\Admin\HeroSlideController;
 use App\Http\Controllers\Admin\PremiumAppController;
+use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ProfileController;
@@ -50,6 +53,15 @@ Route::middleware('auth')->group(function () {
         Route::resource('content-posts', ContentPostController::class)
             ->except('show')
             ->parameters(['content-posts' => 'contentPost']);
+        Route::get('site-settings', [SiteSettingController::class, 'edit'])
+            ->name('site-settings.edit');
+        Route::put('site-settings', [SiteSettingController::class, 'update'])
+            ->name('site-settings.update');
+        Route::resource('hero-slides', HeroSlideController::class)
+            ->except('show')
+            ->parameters(['hero-slides' => 'heroSlide']);
+        Route::resource('announcements', AnnouncementController::class)
+            ->except('show');
         Route::resource('users', UserManagementController::class)
             ->except('show');
     });

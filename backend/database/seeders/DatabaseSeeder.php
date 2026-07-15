@@ -4,7 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\ContentPost;
 use App\Models\Game;
+use App\Models\HeroSlide;
+use App\Models\Announcement;
 use App\Models\PremiumApp;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -24,6 +27,7 @@ class DatabaseSeeder extends Seeder
         $this->seedGames();
         $this->seedPremiumApps();
         $this->seedContentPosts();
+        $this->seedSiteManagement();
     }
 
     private function seedUsers(): void
@@ -261,6 +265,59 @@ class DatabaseSeeder extends Seeder
                 ],
             );
         }
+    }
+
+    private function seedSiteManagement(): void
+    {
+        SiteSetting::seedDefaults();
+
+        $slides = [
+            [
+                'eyebrow' => 'SAFE TOPUP',
+                'title' => 'เติมเกมส์ปลอดภัย',
+                'highlight' => 'มั่นใจได้ ไม่ต้องกลัวโดนแบน',
+                'quote' => 'ร้านเติมเกมที่เชื่อถือได้! ปลอดภัย 100% เล่นต่อได้ไม่มีสะดุด',
+                'image_path' => '/figma/hero.webp',
+                'cta_label' => 'เริ่มเติมเกม',
+                'cta_url' => '/games',
+                'sort_order' => 10,
+            ],
+            [
+                'eyebrow' => 'HOT DEAL',
+                'title' => 'แอพพรีเมี่ยมราคาดี',
+                'highlight' => 'ดูหนัง ฟังเพลง ใช้คุ้มกว่าเดิม',
+                'quote' => 'แพ็กยอดนิยมพร้อมรายละเอียดชัดเจน เลือกง่าย สั่งซื้อไว',
+                'image_path' => '/figma/premium-netflix.webp',
+                'cta_label' => 'ดูแพ็กทั้งหมด',
+                'cta_url' => '/premium',
+                'sort_order' => 20,
+            ],
+            [
+                'eyebrow' => 'EVENT UPDATE',
+                'title' => 'ข่าวเกมและกิจกรรม',
+                'highlight' => 'อัปเดตไว ไม่พลาดทุกกระแส',
+                'quote' => 'รวมข่าว เกมฮิต ทัวร์นาเมนต์ และโปรโมชันจาก Good Friend Shop',
+                'image_path' => '/figma/news-main.webp',
+                'cta_label' => 'อ่านข่าวล่าสุด',
+                'cta_url' => '/news',
+                'sort_order' => 30,
+            ],
+        ];
+
+        foreach ($slides as $slide) {
+            HeroSlide::updateOrCreate(
+                ['title' => $slide['title']],
+                [...$slide, 'is_active' => true],
+            );
+        }
+
+        Announcement::updateOrCreate(
+            ['message' => 'ช่องทางติดต่อ Tel: xxx-xxx-xxxx  Line : xxxxxxxxxx  Facebook : xxxxxx - รับเติมเกมส์ราคาถูก'],
+            [
+                'is_active' => true,
+                'sort_order' => 10,
+            ],
+        );
     }
 
     private function articleContent(string $title, string $excerpt): string

@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Middleware\AllowFrontendCors;
+use App\Models\Announcement;
 use App\Models\ContentPost;
 use App\Models\Game;
+use App\Models\HeroSlide;
 use App\Models\PremiumApp;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Route;
 
 Route::options('/{any}', fn () => response()->noContent())
@@ -15,6 +18,45 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
         return response()->json([
             'status' => 'ok',
             'service' => 'game-topup-api',
+        ]);
+    });
+
+    Route::get('/site-content', function () {
+        SiteSetting::seedDefaults();
+        $now = now();
+
+        return response()->json([
+            'data' => [
+                'settings' => SiteSetting::values(),
+                'hero_slides' => HeroSlide::query()
+                    ->where('is_active', true)
+                    ->orderBy('sort_order')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(fn (HeroSlide $slide) => [
+                        'id' => $slide->id,
+                        'eyebrow' => $slide->eyebrow,
+                        'title' => $slide->title,
+                        'highlight' => $slide->highlight,
+                        'quote' => $slide->quote,
+                        'image' => $slide->imageUrl(),
+                        'href' => $slide->cta_url ?: '/',
+                        'cta' => $slide->cta_label ?: 'ดูเพิ่มเติม',
+                    ])
+                    ->values(),
+                'announcements' => Announcement::query()
+                    ->where('is_active', true)
+                    ->where(fn ($query) => $query->whereNull('starts_at')->orWhere('starts_at', '<=', $now))
+                    ->where(fn ($query) => $query->whereNull('ends_at')->orWhere('ends_at', '>=', $now))
+                    ->orderBy('sort_order')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(fn (Announcement $announcement) => [
+                        'id' => $announcement->id,
+                        'message' => $announcement->message,
+                    ])
+                    ->values(),
+            ],
         ]);
     });
 

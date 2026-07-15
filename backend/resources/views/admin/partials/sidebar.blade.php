@@ -3,6 +3,7 @@
     $packagesActive = request()->routeIs('admin.packages.*', 'admin.products.packages.*');
     $premiumAppsActive = request()->routeIs('admin.premium-apps.*');
     $contentPostsActive = request()->routeIs('admin.content-posts.*');
+    $siteSettingsActive = request()->routeIs('admin.site-settings.*', 'admin.hero-slides.*', 'admin.announcements.*');
     $usersActive = request()->routeIs('admin.users.*');
 @endphp
 
@@ -91,6 +92,23 @@
             <div class="admin-subnav">
                 <a class="admin-subnav-link {{ request()->routeIs('admin.content-posts.index') ? 'is-active' : '' }}" href="{{ route('admin.content-posts.index') }}">รายการทั้งหมด</a>
                 <a class="admin-subnav-link {{ request()->routeIs('admin.content-posts.create') ? 'is-active' : '' }}" href="{{ route('admin.content-posts.create') }}">เพิ่มข่าว/กิจกรรม</a>
+            </div>
+        </details>
+
+        <details class="admin-nav-group" @if ($siteSettingsActive) open @endif>
+            <summary class="admin-nav-link admin-nav-summary {{ $siteSettingsActive ? 'is-active' : '' }}" title="ตั้งค่าเว็บไซต์">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 2a2 2 0 0 1 2 2v1.1a7.8 7.8 0 0 1 1.8.75l.78-.78a2 2 0 0 1 2.83 0l1.52 1.52a2 2 0 0 1 0 2.83l-.78.78c.32.57.57 1.17.75 1.8H22a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1.1a7.8 7.8 0 0 1-.75 1.8l.78.78a2 2 0 0 1 0 2.83l-1.52 1.52a2 2 0 0 1-2.83 0l-.78-.78a7.8 7.8 0 0 1-1.8.75V22a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-1.1a7.8 7.8 0 0 1-1.8-.75l-.78.78a2 2 0 0 1-2.83 0L1.07 19.4a2 2 0 0 1 0-2.83l.78-.78A7.8 7.8 0 0 1 1.1 14H0a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h1.1c.18-.63.43-1.23.75-1.8l-.78-.78a2 2 0 0 1 0-2.83l1.52-1.52a2 2 0 0 1 2.83 0l.78.78A7.8 7.8 0 0 1 8 1.1V0a2 2 0 0 1 2-2h2Zm-1 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" transform="translate(2 2) scale(.83)" />
+                </svg>
+                <span class="admin-nav-label">ตั้งค่าเว็บไซต์</span>
+                <svg class="admin-nav-chevron" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8.5 9.5 12 13l3.5-3.5 1.5 1.5-5 5-5-5 1.5-1.5Z" />
+                </svg>
+            </summary>
+            <div class="admin-subnav">
+                <a class="admin-subnav-link {{ request()->routeIs('admin.site-settings.*') ? 'is-active' : '' }}" href="{{ route('admin.site-settings.edit') }}">ตั้งค่าทั่วไป</a>
+                <a class="admin-subnav-link {{ request()->routeIs('admin.hero-slides.*') ? 'is-active' : '' }}" href="{{ route('admin.hero-slides.index') }}">สไลด์หน้าแรก</a>
+                <a class="admin-subnav-link {{ request()->routeIs('admin.announcements.*') ? 'is-active' : '' }}" href="{{ route('admin.announcements.index') }}">ประกาศ</a>
             </div>
         </details>
 

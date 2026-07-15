@@ -20,7 +20,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import { getGames, getNews, getPremiumProducts } from "@/lib/api";
+import { getGames, getNews, getPremiumProducts, getSiteContent } from "@/lib/api";
 import { assetPath } from "@/lib/paths";
 
 const navItems = [
@@ -190,12 +190,12 @@ function SectionTitle({
   );
 }
 
-function Header() {
+function Header({ logoText = "LOGO" }: { logoText?: string }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#0e0d17]/80 backdrop-blur-xl">
       <div className="mx-auto flex h-[73px] max-w-[1440px] items-center gap-5 px-5 lg:px-11">
         <Link className="shrink-0 text-lg font-bold tracking-wide text-white" href="/">
-          LOGO
+          {logoText}
         </Link>
 
         <nav className="hidden flex-1 items-center justify-center gap-8 text-sm font-medium text-white lg:flex">
@@ -533,17 +533,30 @@ export default function Home() {
   const [homeGames, setHomeGames] = useState(games);
   const [homePremiumProducts, setHomePremiumProducts] = useState(premiumProducts);
   const [homeNews, setHomeNews] = useState(news);
+  const [homeHeroSlides, setHomeHeroSlides] = useState(heroSlides);
+  const [homeAnnouncements, setHomeAnnouncements] = useState([
+    "ช่องทางติดต่อ Tel: xxx-xxx-xxxx  Line : xxxxxxxxxx  Facebook : xxxxxx - รับเติมเกมส์ราคาถูก",
+  ]);
+  const [siteSettings, setSiteSettings] = useState({
+    site_name: "Good Friend Shop",
+    logo_text: "LOGO",
+    footer_tagline: "เติมเกมไวเหมือนเพื่อนรู้ใจ ราคาสบายกระเป๋าที่สุด!",
+    footer_description:
+      "GoodFriendShop คือเพื่อนแท้ของเกมเมอร์ พร้อมสนับสนุนให้คุณเล่นต่อได้ไม่มีสะดุด",
+    contact_line: "xxxxxxx",
+    contact_email: "xxxxxx@gmail.com",
+  });
   const [selectedProduct, setSelectedProduct] = useState<PremiumProduct | null>(
     null,
   );
   const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
-  const activeHeroSlide = heroSlides[currentHeroSlide];
+  const activeHeroSlide = homeHeroSlides[currentHeroSlide] ?? homeHeroSlides[0] ?? heroSlides[0];
 
   useEffect(() => {
     let active = true;
 
-    Promise.all([getGames(), getPremiumProducts(), getNews()]).then(
-      ([gameItems, premiumItems, newsItems]) => {
+    Promise.all([getGames(), getPremiumProducts(), getNews(), getSiteContent()]).then(
+      ([gameItems, premiumItems, newsItems, siteContent]) => {
         if (!active) {
           return;
         }
@@ -551,6 +564,16 @@ export default function Home() {
         setHomeGames(gameItems);
         setHomePremiumProducts(premiumItems);
         setHomeNews(newsItems);
+        if (siteContent) {
+          setSiteSettings((current) => ({ ...current, ...siteContent.settings }));
+          if (siteContent.hero_slides.length) {
+            setHomeHeroSlides(siteContent.hero_slides);
+            setCurrentHeroSlide(0);
+          }
+          if (siteContent.announcements.length) {
+            setHomeAnnouncements(siteContent.announcements.map((item) => item.message));
+          }
+        }
       },
     );
 
@@ -561,18 +584,18 @@ export default function Home() {
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
-      setCurrentHeroSlide((current) => (current + 1) % heroSlides.length);
+      setCurrentHeroSlide((current) => (current + 1) % homeHeroSlides.length);
     }, 5600);
 
     return () => window.clearInterval(intervalId);
-  }, []);
+  }, [homeHeroSlides.length]);
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#0e0d17] text-white">
-      <Header />
+      <Header logoText={siteSettings.logo_text} />
 
       <section className="relative min-h-[860px] overflow-hidden pt-[73px]">
-        {heroSlides.map((slide, index) => (
+        {homeHeroSlides.map((slide, index) => (
           <Image
             alt={slide.title}
             className={`object-cover transition duration-700 ${
@@ -618,7 +641,7 @@ export default function Home() {
                     className="grid h-12 w-12 place-items-center rounded-full border border-white/15 bg-white/10 text-white transition hover:border-emerald-400 hover:text-emerald-300"
                     onClick={() =>
                       setCurrentHeroSlide(
-                        (currentHeroSlide - 1 + heroSlides.length) % heroSlides.length,
+                        (currentHeroSlide - 1 + homeHeroSlides.length) % homeHeroSlides.length,
                       )
                     }
                     type="button"
@@ -629,7 +652,7 @@ export default function Home() {
                     aria-label="สไลด์ถัดไป"
                     className="grid h-12 w-12 place-items-center rounded-full border border-white/15 bg-white/10 text-white transition hover:border-emerald-400 hover:text-emerald-300"
                     onClick={() =>
-                      setCurrentHeroSlide((currentHeroSlide + 1) % heroSlides.length)
+                      setCurrentHeroSlide((currentHeroSlide + 1) % homeHeroSlides.length)
                     }
                     type="button"
                   >
@@ -644,11 +667,11 @@ export default function Home() {
                 <span>Featured Slides</span>
                 <span>
                   {String(currentHeroSlide + 1).padStart(2, "0")} /{" "}
-                  {String(heroSlides.length).padStart(2, "0")}
+                  {String(homeHeroSlides.length).padStart(2, "0")}
                 </span>
               </div>
               <div className="grid gap-3">
-                {heroSlides.map((slide, index) => (
+                {homeHeroSlides.map((slide, index) => (
                   <button
                     className={`grid grid-cols-[72px_1fr] items-center gap-4 rounded-[24px] border p-2 text-left transition ${
                       index === currentHeroSlide
@@ -683,7 +706,7 @@ export default function Home() {
           </div>
 
           <div className="mt-8 flex justify-center gap-2 lg:hidden">
-            {heroSlides.map((slide, index) => (
+            {homeHeroSlides.map((slide, index) => (
               <button
                 aria-label={`เปิดสไลด์ ${index + 1}`}
                 className={`h-2.5 rounded-full transition ${
@@ -704,8 +727,7 @@ export default function Home() {
               <div className="announcement-ticker-track flex h-full w-max items-center whitespace-nowrap md:gap-10">
                 {[0, 1].map((item) => (
                   <span className="announcement-ticker-item flex h-full shrink-0 items-center px-6 md:px-0" key={item}>
-                    ช่องทางติดต่อ Tel: xxx-xxx-xxxx&nbsp;&nbsp; Line :
-                    xxxxxxxxxx&nbsp;&nbsp; Facebook : xxxxxx - รับเติมเกมส์ราคาถูก
+                    {homeAnnouncements.join("   •   ")}
                   </span>
                 ))}
               </div>
@@ -764,15 +786,12 @@ export default function Home() {
       <footer className="mt-12 border-t border-white/5 bg-[rgba(18,16,26,0.35)]">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 lg:grid-cols-[1.2fr_0.8fr_1fr]">
           <div>
-            <h2 className="text-3xl font-semibold text-white">Good Friend Shop</h2>
+            <h2 className="text-3xl font-semibold text-white">{siteSettings.site_name}</h2>
             <p className="mt-1 font-medium text-emerald-400">
-              เติมเกมไวเหมือนเพื่อนรู้ใจ ราคาสบายกระเป๋าที่สุด!
+              {siteSettings.footer_tagline}
             </p>
             <p className="mt-5 max-w-md text-sm leading-7 text-white/80">
-              เกมเมอร์ทุกคนรู้ดีว่าการจะก้าวไปสู่จุดสูงสุดในเกมนั้น
-              เวลาและเงินทุนคือสิ่งสำคัญ GoodFriendShop เข้าใจคุณ
-              เราคือเพื่อนแท้ของเกมเมอร์
-              ที่พร้อมสนับสนุนให้คุณเล่นต่อได้ไม่มีสะดุด
+              {siteSettings.footer_description}
             </p>
           </div>
           <div>
@@ -780,11 +799,11 @@ export default function Home() {
             <div className="mt-6 space-y-4 text-sm text-white/85">
               <p className="flex items-center gap-3">
                 <MessageCircle className="text-white" size={20} />
-                xxxxxxx
+                {siteSettings.contact_line}
               </p>
               <p className="flex items-center gap-3">
                 <Mail className="text-white" size={20} />
-                xxxxxxx@gmail.com
+                {siteSettings.contact_email}
               </p>
             </div>
             <div className="mt-6 flex gap-3">

@@ -54,6 +54,39 @@ export type NewsItem = {
   content?: string | null;
 };
 
+export type SiteSettings = {
+  site_name?: string;
+  logo_text?: string;
+  footer_tagline?: string;
+  footer_description?: string;
+  contact_line?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  facebook_label?: string;
+};
+
+export type HeroSlideItem = {
+  id?: number | string;
+  eyebrow: string;
+  title: string;
+  highlight: string;
+  quote: string;
+  image: string;
+  href: string;
+  cta: string;
+};
+
+export type AnnouncementItem = {
+  id?: number | string;
+  message: string;
+};
+
+export type SiteContent = {
+  settings: SiteSettings;
+  hero_slides: HeroSlideItem[];
+  announcements: AnnouncementItem[];
+};
+
 type ApiPayload<T> = {
   data?: T;
 };
@@ -140,5 +173,21 @@ export async function getNewsArticle(slug: string): Promise<NewsItem | null> {
   return {
     ...data,
     image: normalizeMediaUrl(data.image, fallbackArticle?.image ?? "/figma/news-main.webp"),
+  };
+}
+
+export async function getSiteContent(): Promise<SiteContent | null> {
+  const data = await requestData<SiteContent>("/site-content");
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    ...data,
+    hero_slides: data.hero_slides.map((slide, index) => ({
+      ...slide,
+      image: normalizeMediaUrl(slide.image, index === 0 ? "/figma/hero.webp" : "/figma/news-main.webp"),
+    })),
   };
 }
