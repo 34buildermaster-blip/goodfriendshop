@@ -166,6 +166,28 @@
             min-width: 0;
         }
 
+        .game-thumb {
+            display: grid;
+            width: 62px;
+            height: 62px;
+            flex: 0 0 auto;
+            place-items: center;
+            overflow: hidden;
+            border: 1px solid rgba(102, 237, 189, 0.24);
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(102, 237, 189, 0.24), rgba(255, 255, 255, 0.06));
+            color: #d1fae5;
+            font-size: 22px;
+            font-weight: 900;
+            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.24);
+        }
+
+        .game-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         .chevron {
             display: grid;
             width: 34px;
@@ -373,11 +395,19 @@
                 @foreach ($games as $game)
                     @php
                         $packages = $game->packages;
+                        $gameImageUrl = $game->imageUrl();
                     @endphp
                     <details class="game-group" @if ($loop->first) open @endif>
                         <summary class="game-summary">
                             <div class="game-title">
                                 <span class="chevron">›</span>
+                                <span class="game-thumb">
+                                    @if ($gameImageUrl)
+                                        <img src="{{ $gameImageUrl }}" alt="{{ $game->name }}">
+                                    @else
+                                        {{ \Illuminate\Support\Str::of($game->name)->substr(0, 1)->upper() }}
+                                    @endif
+                                </span>
                                 <div>
                                     <h2>{{ $game->name }}</h2>
                                     <p>
