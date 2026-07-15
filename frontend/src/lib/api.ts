@@ -36,6 +36,48 @@ export type GameItem = {
   packages?: GamePackageItem[];
 };
 
+export type CustomerUser = {
+  id: number | string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  line_id?: string | null;
+};
+
+export type AuthResponse = {
+  token: string;
+  user: CustomerUser;
+};
+
+export type OrderItem = {
+  id?: number | string;
+  order_number: string;
+  customer_name?: string | null;
+  customer_email?: string | null;
+  customer_phone?: string | null;
+  player_identifier: string;
+  server_identifier?: string | null;
+  game_name: string;
+  package_name: string;
+  price: number;
+  currency: string;
+  status: string;
+  status_label: string;
+  customer_note?: string | null;
+  created_at?: string | null;
+};
+
+export type CreateOrderPayload = {
+  game_package_id: number | string;
+  customer_name?: string;
+  customer_email?: string;
+  customer_phone?: string;
+  player_identifier: string;
+  server_identifier?: string;
+  customer_note?: string;
+  extra_fields?: Record<string, string>;
+};
+
 export type PremiumProductItem = PremiumProduct & {
   image?: string;
   provider?: string | null;
@@ -127,6 +169,38 @@ async function requestData<T>(path: string): Promise<T | null> {
   }
 }
 
+async function sendData<T>(
+  path: string,
+  body?: unknown,
+  token?: string | null,
+  method = "POST",
+): Promise<T> {
+  const response = await fetch(`${apiBaseUrl}${path}`, {
+    method,
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  const payload = (await response.json().catch(() => ({}))) as
+    | ApiPayload<T>
+    | { message?: string; errors?: Record<string, string[]> };
+
+  if (!response.ok) {
+    const message =
+      "message" in payload && typeof payload.message === "string"
+        ? payload.message
+        : "ไม่สามารถทำรายการได้ในตอนนี้";
+    throw new Error(message);
+  }
+
+  return "data" in Object(payload) ? ((payload as ApiPayload<T>).data as T) : (payload as T);
+}
+
 export async function getGames(): Promise<GameItem[]> {
   const data = await requestData<GameItem[]>("/games");
   const source = data?.length ? data : fallbackGames;
@@ -136,6 +210,50 @@ export async function getGames(): Promise<GameItem[]> {
     image: normalizeMediaUrl(game.image, fallbackGames[index]?.image ?? "/figma/game-mobile-legends.webp"),
     featured: game.featured ?? index === 0,
   }));
+}
+
+export async function getGame(slug: string): Promise<GameItem | null> {
+  const fallbackGame = fallbackGames.find((game) => (game as GameItem).slug === slug) ?? null;
+  const data = await requestData<GameItem>(`/games/${slug}`);
+
+  if (!data) {
+    return fallbackGame;
+  }
+
+  return {
+    ...data,
+    image: normalizeMediaUrl(data.image, fallbackGame?.image ?? "/figma/game-mobile-legends.webp"),
+  };
+}
+
+export async function createOrder(payload: CreateOrderPayload, token?: string | null) {
+  return sendData<OrderItem>("/orders", payload, token);
+}
+
+export async function loginCustomer(email: string, password: string) {
+  return sendData<AuthResponse>("/auth/login", { email, password });
+}
+
+export async function registerCustomer(payload: {
+  name: string;
+  email: string;
+  phone?: string;
+  line_id?: string;
+  password: string;
+}) {
+  return sendData<AuthResponse>("/auth/register", payload);
+}
+
+export async function getCurrentCustomer(token: string) {
+  return sendData<CustomerUser>("/auth/me", undefined, token, "GET");
+}
+
+export async function logoutCustomer(token: string) {
+  return sendData<{ ok: boolean }>("/auth/logout", undefined, token);
+}
+
+export async function getMyOrders(token: string) {
+  return sendData<OrderItem[]>("/my/orders", undefined, token, "GET");
 }
 
 export async function getPremiumProducts(): Promise<PremiumProductItem[]> {

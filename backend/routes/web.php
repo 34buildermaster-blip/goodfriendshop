@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ContentPostController;
 use App\Http\Controllers\Admin\GamePackageController;
 use App\Http\Controllers\Admin\GameProductController;
 use App\Http\Controllers\Admin\HeroSlideController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PremiumAppController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -28,6 +29,8 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
+        Route::resource('orders', OrderController::class)
+            ->only(['index', 'edit', 'update']);
         Route::resource('products', GameProductController::class)
             ->except('show')
             ->parameters(['products' => 'game']);

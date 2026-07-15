@@ -159,11 +159,15 @@ export function GameCard({
   featured,
   image,
   name,
+  slug,
 }: {
   featured?: boolean;
   image: string;
   name: string;
+  slug?: string;
 }) {
+  const href = slug ? `/games/${slug}` : "/games";
+
   return (
     <article
       className={`rounded-[28px] border bg-[#161d26]/80 p-2.5 text-center transition hover:-translate-y-1 hover:border-emerald-400 hover:shadow-[0_0_24px_rgba(0,207,127,0.22)] ${
@@ -182,15 +186,16 @@ export function GameCard({
         />
       </div>
       <h3 className="mt-4 min-h-5 text-sm font-medium text-white">{name}</h3>
-      <button
-        className={`mt-3 h-10 rounded-2xl px-5 text-base font-semibold transition ${
+      <Link
+        className={`mt-3 inline-flex h-10 items-center justify-center rounded-2xl px-5 text-base font-semibold transition ${
           featured
             ? "border border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-white"
             : "bg-emerald-500 text-white hover:bg-emerald-400"
         }`}
+        href={href}
       >
         เติมเกม
-      </button>
+      </Link>
     </article>
   );
 }

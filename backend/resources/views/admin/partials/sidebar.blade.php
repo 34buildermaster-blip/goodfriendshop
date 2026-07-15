@@ -4,6 +4,7 @@
     $premiumAppsActive = request()->routeIs('admin.premium-apps.*');
     $contentPostsActive = request()->routeIs('admin.content-posts.*');
     $siteSettingsActive = request()->routeIs('admin.site-settings.*', 'admin.hero-slides.*', 'admin.announcements.*');
+    $ordersActive = request()->routeIs('admin.orders.*');
     $usersActive = request()->routeIs('admin.users.*');
 @endphp
 
@@ -30,6 +31,21 @@
             </svg>
             <span class="admin-nav-label">แดชบอร์ด</span>
         </a>
+
+        <details class="admin-nav-group" @if ($ordersActive) open @endif>
+            <summary class="admin-nav-link admin-nav-summary {{ $ordersActive ? 'is-active' : '' }}" title="ออเดอร์">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7 4h10a2 2 0 0 1 2 2v15l-3-1.7-3 1.7-3-1.7L7 21V6a2 2 0 0 1 2-2Zm2 2v11.6l1-.6 3 1.7 3-1.7 1 .6V6H9Zm2 3h4v2h-4V9Zm0 4h5v2h-5v-2Z" />
+                </svg>
+                <span class="admin-nav-label">ออเดอร์</span>
+                <svg class="admin-nav-chevron" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8.5 9.5 12 13l3.5-3.5 1.5 1.5-5 5-5-5 1.5-1.5Z" />
+                </svg>
+            </summary>
+            <div class="admin-subnav">
+                <a class="admin-subnav-link {{ request()->routeIs('admin.orders.index') ? 'is-active' : '' }}" href="{{ route('admin.orders.index') }}">รายการออเดอร์</a>
+            </div>
+        </details>
 
         <details class="admin-nav-group" @if ($productsActive) open @endif>
             <summary class="admin-nav-link admin-nav-summary {{ $productsActive ? 'is-active' : '' }}" title="เกม">
