@@ -89,7 +89,7 @@ export function AccountButton() {
         <span className="grid h-7 w-7 place-items-center rounded-full bg-emerald-400 text-xs font-bold text-[#06140f]">
           {user?.name ? user.name.charAt(0).toUpperCase() : <UserRound size={15} />}
         </span>
-        <span>Account</span>
+        <span className="max-w-28 truncate">{user?.name ?? "Account"}</span>
         <ChevronDown
           className={`transition ${open ? "rotate-180 text-emerald-300" : "text-white/70"}`}
           size={16}
