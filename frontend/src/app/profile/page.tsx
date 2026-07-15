@@ -25,7 +25,6 @@ import {
   Phone,
   Save,
   ShieldCheck,
-  TicketPercent,
   UserRound,
   WalletCards,
   X,
@@ -57,8 +56,7 @@ const tabs: Array<{ id: ProfileTab; label: string; icon: typeof UserRound }> = [
 const memberMenu = [
   { label: "หน้าหลัก", href: "/", icon: Home },
   { label: "เติมเกม", href: "/games", icon: Gamepad2 },
-  { label: "คูปองของฉัน", href: "/profile", icon: TicketPercent },
-  { label: "ออเดอร์ของฉัน", href: "/profile", icon: History },
+  { label: "แอพพรีเมียม", href: "/premium", icon: Gift },
 ];
 
 function initials(name: string) {
@@ -344,6 +342,11 @@ export default function ProfilePage() {
     }
   }
 
+  function handleProfileTabChange(tab: ProfileTab) {
+    setActiveTab(tab);
+    window.history.replaceState(null, "", tab === "overview" ? "/profile" : `/profile?tab=${tab}`);
+  }
+
   return (
     <main className="min-h-screen overflow-hidden bg-[#0e0d17] text-white">
       <SiteHeader activeHref="/profile" />
@@ -380,6 +383,24 @@ export default function ProfilePage() {
             </div>
 
             <nav className="mt-5 grid gap-2">
+              {tabs.map(({ id, icon: Icon, label }) => (
+                <button
+                  className={`flex h-12 items-center gap-3 rounded-2xl px-4 text-left text-sm font-semibold transition ${
+                    activeTab === id
+                      ? "bg-emerald-400 text-[#06140f] shadow-lg shadow-emerald-500/20"
+                      : "text-white/70 hover:bg-white/[0.06] hover:text-white"
+                  }`}
+                  key={id}
+                  onClick={() => handleProfileTabChange(id)}
+                  type="button"
+                >
+                  <Icon size={18} />
+                  {label}
+                </button>
+              ))}
+            </nav>
+
+            <nav className="mt-5 grid gap-2 border-t border-white/10 pt-4">
               {memberMenu.map(({ href, icon: Icon, label }) => (
                 <Link
                   className="flex h-12 items-center gap-3 rounded-2xl px-4 text-sm font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white"
@@ -468,29 +489,6 @@ export default function ProfilePage() {
                 ) : null}
 
                 <section className="overflow-hidden rounded-[32px] border border-emerald-300/15 bg-[#111821]/92 text-white shadow-2xl shadow-black/20">
-                  <div className="border-b border-white/10 bg-[#0c151e] px-5 pt-4">
-                    <div className="flex flex-wrap gap-2">
-                      {tabs.map(({ id, icon: Icon, label }) => (
-                        <button
-                          className={`flex h-11 items-center gap-2 rounded-t-2xl px-4 text-sm font-semibold transition ${
-                            activeTab === id
-                              ? "bg-emerald-400 text-[#06140f]"
-                              : "bg-white/[0.06] text-white/74 hover:bg-white/12 hover:text-white"
-                          }`}
-                          key={id}
-                          onClick={() => {
-                            setActiveTab(id);
-                            window.history.replaceState(null, "", id === "overview" ? "/profile" : `/profile?tab=${id}`);
-                          }}
-                          type="button"
-                        >
-                          <Icon size={17} />
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
                   <div className="grid gap-6 p-5 lg:grid-cols-[320px_1fr] lg:p-7">
                     <div className="flex items-center gap-5">
                       <div className="relative shrink-0">
