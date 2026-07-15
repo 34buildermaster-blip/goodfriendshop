@@ -73,6 +73,42 @@ class OrderFlowTest extends TestCase
         $this->assertNotEmpty($login->json('data.token'));
     }
 
+    public function test_customer_can_update_profile_and_view_order_detail(): void
+    {
+        $package = $this->createActivePackage();
+        $register = $this->postJson('/api/auth/register', [
+            'name' => 'Customer One',
+            'email' => 'customer@example.com',
+            'phone' => '0899999999',
+            'password' => 'password123',
+        ])->assertCreated();
+        $token = $register->json('data.token');
+
+        $this->patchJson('/api/auth/me', [
+            'name' => 'Customer Updated',
+            'email' => 'updated@example.com',
+            'phone' => '0811111111',
+            'line_id' => 'goodfriendline',
+        ], ['Authorization' => "Bearer {$token}"])
+            ->assertOk()
+            ->assertJsonPath('data.name', 'Customer Updated')
+            ->assertJsonPath('data.line_id', 'goodfriendline');
+
+        $orderNumber = $this->postJson('/api/orders', [
+            'game_package_id' => $package->id,
+            'player_identifier' => '999888777',
+            'server_identifier' => '2002',
+        ], ['Authorization' => "Bearer {$token}"])
+            ->assertCreated()
+            ->json('data.order_number');
+
+        $this->getJson("/api/my/orders/{$orderNumber}", ['Authorization' => "Bearer {$token}"])
+            ->assertOk()
+            ->assertJsonPath('data.customer_name', 'Customer Updated')
+            ->assertJsonPath('data.status_steps.0.label', 'รับออเดอร์')
+            ->assertJsonPath('data.next_action', 'รอทีมงานตรวจสอบข้อมูลและยอดชำระ');
+    }
+
     public function test_admin_can_update_order_status(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);

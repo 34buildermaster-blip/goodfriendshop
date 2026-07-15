@@ -4,8 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
+  AlertCircle,
   BadgeCheck,
+  Bell,
   ChevronRight,
+  CheckCircle2,
+  Clock,
   Coins,
   CreditCard,
   Gamepad2,
@@ -17,16 +21,20 @@ import {
   Mail,
   MessageCircle,
   Phone,
+  Save,
   ShieldCheck,
   TicketPercent,
   UserRound,
   WalletCards,
+  X,
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-chrome";
 import {
   getCurrentCustomer,
+  getMyOrder,
   getMyOrders,
   logoutCustomer,
+  updateCurrentCustomer,
   type CustomerUser,
   type OrderItem,
 } from "@/lib/api";
@@ -81,6 +89,18 @@ export default function ProfilePage() {
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<ProfileTab>("overview");
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileMessage, setProfileMessage] = useState("");
+  const [profileError, setProfileError] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<OrderItem | null>(null);
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    line_id: "",
+  });
 
   useEffect(() => {
     const token = window.localStorage.getItem("gfs_token");
@@ -99,6 +119,13 @@ export default function ProfilePage() {
       .then(([currentUser, currentOrders]) => {
         setUser(currentUser);
         setOrders(currentOrders);
+        setProfileForm({
+          name: currentUser.name,
+          email: currentUser.email,
+          phone: currentUser.phone ?? "",
+          line_id: currentUser.line_id ?? "",
+        });
+        setSelectedOrder(currentOrders[0] ?? null);
         window.localStorage.setItem("gfs_user", JSON.stringify(currentUser));
       })
       .catch(() => {
@@ -117,6 +144,42 @@ export default function ProfilePage() {
     [orders],
   );
 
+  const memberNotifications = useMemo(() => {
+    if (!user) {
+      return [];
+    }
+
+    const notices: Array<{ tone: "warning" | "info" | "success"; title: string; body: string }> = [];
+    const pendingOrders = orders.filter((order) => order.status === "pending");
+    const activeOrders = orders.filter((order) => ["paid", "processing"].includes(order.status));
+
+    if (!user.phone || !user.line_id) {
+      notices.push({
+        tone: "warning",
+        title: "ข้อมูลติดต่อยังไม่ครบ",
+        body: "แนะนำให้เพิ่มเบอร์โทรและ LINE ID เพื่อให้ทีมงานติดต่อกลับได้เร็วขึ้น",
+      });
+    }
+
+    if (pendingOrders.length > 0) {
+      notices.push({
+        tone: "info",
+        title: `มี ${pendingOrders.length} ออเดอร์รอตรวจสอบ`,
+        body: "ทีมงานจะอัปเดตสถานะหลังตรวจข้อมูลและการชำระเงิน",
+      });
+    }
+
+    if (activeOrders.length > 0) {
+      notices.push({
+        tone: "success",
+        title: `มี ${activeOrders.length} ออเดอร์กำลังดำเนินการ`,
+        body: "สามารถดูรายละเอียดและขั้นตอนล่าสุดได้ในแท็บประวัติออเดอร์",
+      });
+    }
+
+    return notices;
+  }, [orders, user]);
+
   async function handleLogout() {
     const token = window.localStorage.getItem("gfs_token");
     if (token) {
@@ -125,6 +188,78 @@ export default function ProfilePage() {
     window.localStorage.removeItem("gfs_token");
     window.localStorage.removeItem("gfs_user");
     router.push("/login");
+  }
+
+  function resetProfileForm() {
+    if (!user) {
+      return;
+    }
+
+    setProfileForm({
+      name: user.name,
+      email: user.email,
+      phone: user.phone ?? "",
+      line_id: user.line_id ?? "",
+    });
+    setProfileError("");
+    setProfileMessage("");
+    setEditingProfile(false);
+  }
+
+  async function handleSaveProfile() {
+    const token = window.localStorage.getItem("gfs_token");
+
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    setSavingProfile(true);
+    setProfileError("");
+    setProfileMessage("");
+
+    try {
+      const updatedUser = await updateCurrentCustomer(token, {
+        name: profileForm.name,
+        email: profileForm.email,
+        phone: profileForm.phone || null,
+        line_id: profileForm.line_id || null,
+      });
+
+      setUser(updatedUser);
+      setProfileForm({
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone ?? "",
+        line_id: updatedUser.line_id ?? "",
+      });
+      window.localStorage.setItem("gfs_user", JSON.stringify(updatedUser));
+      setEditingProfile(false);
+      setProfileMessage("บันทึกข้อมูลสมาชิกเรียบร้อยแล้ว");
+    } catch (caught) {
+      setProfileError(caught instanceof Error ? caught.message : "บันทึกข้อมูลไม่สำเร็จ");
+    } finally {
+      setSavingProfile(false);
+    }
+  }
+
+  async function handleSelectOrder(order: OrderItem) {
+    const token = window.localStorage.getItem("gfs_token");
+
+    setSelectedOrder(order);
+
+    if (!token) {
+      return;
+    }
+
+    setOrderLoading(true);
+    try {
+      setSelectedOrder(await getMyOrder(token, order.order_number));
+    } catch {
+      setSelectedOrder(order);
+    } finally {
+      setOrderLoading(false);
+    }
   }
 
   return (
@@ -227,6 +362,31 @@ export default function ProfilePage() {
 
             {user ? (
               <>
+                {memberNotifications.length > 0 ? (
+                  <section className="mb-6 grid gap-3">
+                    {memberNotifications.map((notice) => (
+                      <div
+                        className={`rounded-3xl border p-4 ${
+                          notice.tone === "warning"
+                            ? "border-amber-300/20 bg-amber-400/10 text-amber-100"
+                            : notice.tone === "success"
+                              ? "border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
+                              : "border-sky-300/20 bg-sky-400/10 text-sky-100"
+                        }`}
+                        key={notice.title}
+                      >
+                        <div className="flex gap-3">
+                          {notice.tone === "warning" ? <AlertCircle className="mt-1 shrink-0" size={20} /> : <Bell className="mt-1 shrink-0" size={20} />}
+                          <div>
+                            <p className="font-semibold">{notice.title}</p>
+                            <p className="mt-1 text-sm leading-6 text-white/68">{notice.body}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </section>
+                ) : null}
+
                 <section className="overflow-hidden rounded-[32px] border border-emerald-300/15 bg-[#111821]/92 text-white shadow-2xl shadow-black/20">
                   <div className="border-b border-white/10 bg-[#0c151e] px-5 pt-4">
                     <div className="flex flex-wrap gap-2">
@@ -297,17 +457,87 @@ export default function ProfilePage() {
                           <h2 className="text-2xl font-bold">ข้อมูลส่วนตัว</h2>
                           <p className="mt-1 text-sm text-white/58">ข้อมูลหลักของบัญชีสมาชิก</p>
                         </div>
-                        <span className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-white/58">
-                          แก้ไขเร็ว ๆ นี้
-                        </span>
+                        {editingProfile ? (
+                          <button
+                            className="flex h-10 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-semibold text-white/72 hover:text-white"
+                            onClick={resetProfileForm}
+                            type="button"
+                          >
+                            <X size={16} />
+                            ยกเลิก
+                          </button>
+                        ) : (
+                          <button
+                            className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200"
+                            onClick={() => {
+                              setProfileError("");
+                              setProfileMessage("");
+                              setEditingProfile(true);
+                            }}
+                            type="button"
+                          >
+                            แก้ไขข้อมูล
+                          </button>
+                        )}
                       </div>
 
-                      <div className="mt-6 grid gap-4 md:grid-cols-2">
-                        <InfoField label="ชื่อ" value={user.name} />
-                        <InfoField label="อีเมล" value={user.email} />
-                        <InfoField label="เบอร์โทร" value={user.phone ?? "-"} />
-                        <InfoField label="LINE ID" value={user.line_id ?? "-"} />
-                      </div>
+                      {profileMessage ? (
+                        <p className="mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-3 text-sm text-emerald-100">
+                          {profileMessage}
+                        </p>
+                      ) : null}
+
+                      {profileError ? (
+                        <p className="mt-4 rounded-2xl border border-red-300/20 bg-red-400/10 p-3 text-sm text-red-100">
+                          {profileError}
+                        </p>
+                      ) : null}
+
+                      {editingProfile ? (
+                        <div className="mt-6 grid gap-4 md:grid-cols-2">
+                          <ProfileInput
+                            label="ชื่อ"
+                            onChange={(value) => setProfileForm((current) => ({ ...current, name: value }))}
+                            required
+                            value={profileForm.name}
+                          />
+                          <ProfileInput
+                            label="อีเมล"
+                            onChange={(value) => setProfileForm((current) => ({ ...current, email: value }))}
+                            required
+                            type="email"
+                            value={profileForm.email}
+                          />
+                          <ProfileInput
+                            label="เบอร์โทร"
+                            onChange={(value) => setProfileForm((current) => ({ ...current, phone: value }))}
+                            value={profileForm.phone}
+                          />
+                          <ProfileInput
+                            label="LINE ID"
+                            onChange={(value) => setProfileForm((current) => ({ ...current, line_id: value }))}
+                            value={profileForm.line_id}
+                          />
+                          <div className="md:col-span-2">
+                            <button
+                              className="flex h-12 items-center justify-center gap-2 rounded-full bg-emerald-500 px-7 text-sm font-semibold text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+                              disabled={savingProfile}
+                              onClick={handleSaveProfile}
+                              type="button"
+                            >
+                              <Save size={17} />
+                              {savingProfile ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-6 grid gap-4 md:grid-cols-2">
+                          <InfoField label="ชื่อ" value={user.name} />
+                          <InfoField label="อีเมล" value={user.email} />
+                          <InfoField label="เบอร์โทร" value={user.phone ?? "-"} />
+                          <InfoField label="LINE ID" value={user.line_id ?? "-"} />
+                        </div>
+                      )}
 
                       <div className="mt-6 grid gap-4 md:grid-cols-3">
                         <SummaryCard icon={History} label="ออเดอร์ทั้งหมด" value={String(orderSummary.total)} />
@@ -319,10 +549,27 @@ export default function ProfilePage() {
 
                   {activeTab === "contact" ? (
                     <div>
-                      <h2 className="text-2xl font-bold">ช่องทางติดต่อ</h2>
-                      <p className="mt-1 text-sm text-white/58">
-                        ใช้สำหรับติดต่อกลับและแจ้งสถานะรายการในอนาคต
-                      </p>
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <h2 className="text-2xl font-bold">ช่องทางติดต่อ</h2>
+                          <p className="mt-1 text-sm text-white/58">
+                            ใช้สำหรับติดต่อกลับและแจ้งสถานะรายการในอนาคต
+                          </p>
+                        </div>
+                        <button
+                          className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200"
+                          onClick={() => {
+                            setProfileError("");
+                            setProfileMessage("");
+                            setEditingProfile(true);
+                            setActiveTab("overview");
+                            window.history.replaceState(null, "", "/profile");
+                          }}
+                          type="button"
+                        >
+                          แก้ไขช่องทางติดต่อ
+                        </button>
+                      </div>
                       <div className="mt-6 grid gap-4 md:grid-cols-3">
                         <ContactField icon={Phone} label="เบอร์โทรศัพท์" value={user.phone ?? "-"} />
                         <ContactField icon={Mail} label="อีเมลรับข้อมูล" value={user.email} />
@@ -359,7 +606,7 @@ export default function ProfilePage() {
                         <div className="mt-6 overflow-hidden rounded-3xl border border-white/10">
                           {orders.map((order) => (
                             <article
-                              className="grid gap-4 border-b border-white/10 bg-white/[0.03] p-4 last:border-b-0 md:grid-cols-[1fr_auto_auto]"
+                              className="grid gap-4 border-b border-white/10 bg-white/[0.03] p-4 last:border-b-0 md:grid-cols-[1fr_auto_auto_auto]"
                               key={order.order_number}
                             >
                               <div>
@@ -382,10 +629,21 @@ export default function ProfilePage() {
                                   {order.status_label}
                                 </span>
                               </div>
+                              <button
+                                className="h-9 rounded-full border border-emerald-300/20 px-4 text-xs font-bold text-emerald-200 transition hover:bg-emerald-400/10"
+                                onClick={() => handleSelectOrder(order)}
+                                type="button"
+                              >
+                                ดูรายละเอียด
+                              </button>
                             </article>
                           ))}
                         </div>
                       )}
+
+                      {selectedOrder ? (
+                        <OrderDetailCard loading={orderLoading} order={selectedOrder} />
+                      ) : null}
                     </div>
                   ) : null}
 
@@ -419,6 +677,120 @@ function InfoField({ label, value }: { label: string; value: string }) {
       <p className="text-sm font-semibold text-emerald-300">{label}</p>
       <p className="mt-2 min-h-6 break-words text-base font-bold text-white">{value}</p>
     </div>
+  );
+}
+
+function ProfileInput({
+  label,
+  onChange,
+  required,
+  type = "text",
+  value,
+}: {
+  label: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  type?: string;
+  value: string;
+}) {
+  return (
+    <label className="grid gap-2 text-sm font-semibold text-emerald-300">
+      {label}
+      <input
+        className="h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-base font-semibold text-white outline-none transition placeholder:text-white/30 focus:border-emerald-400 focus:bg-white/[0.06]"
+        onChange={(event) => onChange(event.target.value)}
+        required={required}
+        type={type}
+        value={value}
+      />
+    </label>
+  );
+}
+
+function OrderDetailCard({ loading, order }: { loading: boolean; order: OrderItem }) {
+  const steps =
+    order.status_steps?.length
+      ? order.status_steps
+      : [
+          { key: "pending", label: "รับออเดอร์", state: order.status === "pending" ? "current" : "done" as const },
+          { key: "paid", label: "ชำระเงิน", state: order.status === "paid" ? "current" : "upcoming" as const },
+          { key: "processing", label: "กำลังดำเนินการ", state: order.status === "processing" ? "current" : "upcoming" as const },
+          { key: "completed", label: "สำเร็จ", state: order.status === "completed" ? "current" : "upcoming" as const },
+        ];
+
+  return (
+    <section className="mt-6 rounded-3xl border border-emerald-300/15 bg-white/[0.04] p-5">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-300">
+            Order detail
+          </p>
+          <h3 className="mt-2 text-2xl font-bold text-white">{order.order_number}</h3>
+          <p className="mt-1 text-sm text-white/58">
+            {order.game_name} / {order.package_name}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-black/10 px-4 py-3 md:text-right">
+          <p className="font-bold text-[#ffc012]">
+            {order.currency} {Number(order.price).toFixed(2)}
+          </p>
+          <p className="mt-1 text-xs text-white/42">
+            อัปเดตล่าสุด {order.updated_at ? new Date(order.updated_at).toLocaleString("th-TH") : "-"}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-white/10 bg-black/10 p-4">
+        <div className="flex gap-3">
+          <Clock className="mt-1 shrink-0 text-emerald-300" size={20} />
+          <div>
+            <p className="font-semibold text-white">สถานะตอนนี้: {order.status_label}</p>
+            <p className="mt-1 text-sm leading-6 text-white/62">
+              {loading ? "กำลังโหลดรายละเอียดล่าสุด..." : (order.next_action ?? "รออัปเดตจากทีมงาน")}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-4">
+        {steps.map((step) => (
+          <div
+            className={`rounded-2xl border p-4 ${
+              step.state === "done"
+                ? "border-emerald-300/25 bg-emerald-400/10"
+                : step.state === "current"
+                  ? "border-[#ffc012]/35 bg-[#ffc012]/10"
+                  : "border-white/10 bg-white/[0.03]"
+            }`}
+            key={step.key}
+          >
+            <div className="flex items-center gap-2">
+              {step.state === "done" ? (
+                <CheckCircle2 className="text-emerald-300" size={18} />
+              ) : step.state === "current" ? (
+                <Clock className="text-[#ffc012]" size={18} />
+              ) : (
+                <span className="h-[18px] w-[18px] rounded-full border border-white/20" />
+              )}
+              <p className="text-sm font-bold text-white">{step.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-3">
+        <InfoField label="UID / Player ID" value={order.player_identifier} />
+        <InfoField label="Server / Zone" value={order.server_identifier ?? "-"} />
+        <InfoField label="เบอร์ติดต่อ" value={order.customer_phone ?? "-"} />
+      </div>
+
+      {order.support_note ? (
+        <div className="mt-5 rounded-2xl border border-sky-300/20 bg-sky-400/10 p-4">
+          <p className="font-semibold text-sky-100">ข้อความจากทีมงาน</p>
+          <p className="mt-1 text-sm leading-6 text-white/70">{order.support_note}</p>
+        </div>
+      ) : null}
+    </section>
   );
 }
 

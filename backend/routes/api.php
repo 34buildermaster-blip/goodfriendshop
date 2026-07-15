@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 Route::options('/{any}', fn () => response()->noContent())
     ->where('any', '.*')
@@ -48,6 +49,45 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
         'line_id' => $user->line_id,
     ];
 
+    $orderStatusSteps = function (Order $order): array {
+        if ($order->status === Order::STATUS_CANCELLED) {
+            return [
+                ['key' => Order::STATUS_PENDING, 'label' => 'รับออเดอร์', 'state' => 'done'],
+                ['key' => Order::STATUS_CANCELLED, 'label' => 'ยกเลิก', 'state' => 'current'],
+            ];
+        }
+
+        $steps = [
+            Order::STATUS_PENDING => 'รับออเดอร์',
+            Order::STATUS_PAID => 'ชำระเงิน',
+            Order::STATUS_PROCESSING => 'กำลังดำเนินการ',
+            Order::STATUS_COMPLETED => 'สำเร็จ',
+        ];
+        $currentIndex = array_search($order->status, array_keys($steps), true);
+
+        return collect($steps)
+            ->map(function (string $label, string $key) use ($currentIndex, $steps) {
+                $index = array_search($key, array_keys($steps), true);
+
+                return [
+                    'key' => $key,
+                    'label' => $label,
+                    'state' => $index < $currentIndex ? 'done' : ($index === $currentIndex ? 'current' : 'upcoming'),
+                ];
+            })
+            ->values()
+            ->all();
+    };
+
+    $orderNextAction = fn (Order $order) => match ($order->status) {
+        Order::STATUS_PENDING => 'รอทีมงานตรวจสอบข้อมูลและยอดชำระ',
+        Order::STATUS_PAID => 'รับชำระแล้ว รอทีมงานเริ่มดำเนินการ',
+        Order::STATUS_PROCESSING => 'ทีมงานกำลังเติมสินค้าให้บัญชีเกมของคุณ',
+        Order::STATUS_COMPLETED => 'รายการสำเร็จแล้ว ตรวจสอบสินค้าในบัญชีเกมได้เลย',
+        Order::STATUS_CANCELLED => 'รายการถูกยกเลิก หากมีข้อสงสัยติดต่อทีมงาน',
+        default => 'รออัปเดตสถานะจากทีมงาน',
+    };
+
     $orderPayload = fn (Order $order) => [
         'id' => $order->id,
         'order_number' => $order->order_number,
@@ -63,7 +103,11 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
         'status' => $order->status,
         'status_label' => Order::statusLabels()[$order->status] ?? $order->status,
         'customer_note' => $order->customer_note,
+        'support_note' => $order->admin_note,
+        'next_action' => $orderNextAction($order),
+        'status_steps' => $orderStatusSteps($order),
         'created_at' => $order->created_at?->toIso8601String(),
+        'updated_at' => $order->updated_at?->toIso8601String(),
     ];
 
     Route::get('/health', function () {
@@ -123,6 +167,23 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
         abort_unless($user, 401);
 
         return response()->json(['data' => $userPayload($user)]);
+    });
+
+    Route::patch('/auth/me', function (Request $request) use ($resolveApiUser, $userPayload) {
+        $user = $resolveApiUser($request);
+
+        abort_unless($user, 401);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:160'],
+            'email' => ['required', 'email', 'max:160', Rule::unique('users', 'email')->ignore($user)],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'line_id' => ['nullable', 'string', 'max:80'],
+        ]);
+
+        $user->update($data);
+
+        return response()->json(['data' => $userPayload($user->refresh())]);
     });
 
     Route::post('/auth/logout', function (Request $request) use ($resolveApiUser) {
@@ -302,6 +363,14 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
                 ->map(fn (Order $order) => $orderPayload($order))
                 ->values(),
         ]);
+    });
+
+    Route::get('/my/orders/{order:order_number}', function (Request $request, Order $order) use ($resolveApiUser, $orderPayload) {
+        $user = $resolveApiUser($request);
+
+        abort_unless($user && (int) $order->user_id === (int) $user->id, 404);
+
+        return response()->json(['data' => $orderPayload($order)]);
     });
 
     Route::get('/premium-apps', function () {

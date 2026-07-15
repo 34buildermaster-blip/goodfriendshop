@@ -64,7 +64,15 @@ export type OrderItem = {
   status: string;
   status_label: string;
   customer_note?: string | null;
+  support_note?: string | null;
+  next_action?: string | null;
+  status_steps?: Array<{
+    key: string;
+    label: string;
+    state: "done" | "current" | "upcoming";
+  }>;
   created_at?: string | null;
+  updated_at?: string | null;
 };
 
 export type CreateOrderPayload = {
@@ -248,12 +256,26 @@ export async function getCurrentCustomer(token: string) {
   return sendData<CustomerUser>("/auth/me", undefined, token, "GET");
 }
 
+export async function updateCurrentCustomer(
+  token: string,
+  payload: Pick<CustomerUser, "name" | "email"> & {
+    phone?: string | null;
+    line_id?: string | null;
+  },
+) {
+  return sendData<CustomerUser>("/auth/me", payload, token, "PATCH");
+}
+
 export async function logoutCustomer(token: string) {
   return sendData<{ ok: boolean }>("/auth/logout", undefined, token);
 }
 
 export async function getMyOrders(token: string) {
   return sendData<OrderItem[]>("/my/orders", undefined, token, "GET");
+}
+
+export async function getMyOrder(token: string, orderNumber: string) {
+  return sendData<OrderItem>(`/my/orders/${orderNumber}`, undefined, token, "GET");
 }
 
 export async function getPremiumProducts(): Promise<PremiumProductItem[]> {
