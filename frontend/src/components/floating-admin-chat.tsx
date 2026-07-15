@@ -1,22 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Headphones, MessageCircle, X } from "lucide-react";
-import { getSiteContent, type SiteSettings } from "@/lib/api";
+import { cleanSiteSettingValue, useSiteSettings } from "@/components/site-settings-provider";
 
-function cleanValue(value?: string | null) {
-  const cleaned = value?.trim() ?? "";
-
-  if (!cleaned || /^x+$/i.test(cleaned)) {
-    return "";
-  }
-
-  return cleaned;
-}
-
-function lineHref(settings: SiteSettings | null) {
-  const line = cleanValue(settings?.contact_line);
+function lineHref(lineValue?: string | null) {
+  const line = cleanSiteSettingValue(lineValue);
 
   if (!line) {
     return "/contact";
@@ -38,18 +28,12 @@ function isExternalUrl(value: string) {
 }
 
 export function FloatingAdminChat() {
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const settings = useSiteSettings();
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    getSiteContent()
-      .then((content) => setSettings(content?.settings ?? null))
-      .catch(() => setSettings(null));
-  }, []);
-
-  const href = useMemo(() => lineHref(settings), [settings]);
+  const href = useMemo(() => lineHref(settings.contact_line), [settings.contact_line]);
   const external = isExternalUrl(href);
-  const lineLabel = cleanValue(settings?.contact_line);
+  const lineLabel = cleanSiteSettingValue(settings.contact_line);
 
   return (
     <div className="fixed bottom-5 right-4 z-[80] flex flex-col items-end gap-3 sm:bottom-7 sm:right-7">

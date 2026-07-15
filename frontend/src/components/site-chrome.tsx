@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -8,6 +10,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { AccountButton } from "@/components/account-button";
+import { cleanSiteSettingValue, useSiteSettings } from "@/components/site-settings-provider";
 import { navItems } from "@/lib/site-data";
 import { assetPath } from "@/lib/paths";
 
@@ -20,17 +23,23 @@ export function SiteHeader({
   logoPath?: string;
   logoText?: string;
 }) {
+  const settings = useSiteSettings();
+  const resolvedLogoPath =
+    logoPath === "/figma/logo-goodfriend.webp" ? (settings.logo_path ?? logoPath) : logoPath;
+  const resolvedLogoText =
+    logoText === "Good Friend Shop" ? (settings.site_name ?? logoText) : logoText;
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#0e0d17]/80 backdrop-blur-xl">
       <div className="mx-auto flex h-[82px] max-w-[1440px] items-center gap-5 px-5 lg:px-11">
         <Link className="relative flex h-16 w-[230px] shrink-0 items-center text-lg font-bold tracking-wide text-white" href="/">
           <Image
-            alt={logoText}
+            alt={resolvedLogoText}
             className="object-contain object-left"
             fill
             priority
             sizes="230px"
-            src={assetPath(logoPath)}
+            src={assetPath(resolvedLogoPath)}
           />
         </Link>
 
@@ -241,25 +250,36 @@ export function NewsCard({
 }
 
 export function SiteFooter() {
+  const settings = useSiteSettings();
+  const logoPath = settings.logo_path ?? "/figma/logo-goodfriend.webp";
+  const siteName = settings.site_name ?? "Good Friend Shop";
+  const lineLabel = cleanSiteSettingValue(settings.contact_line) || "xxxxxxx";
+  const emailLabel = cleanSiteSettingValue(settings.contact_email) || "xxxxxxx@gmail.com";
+  const phoneLabel = cleanSiteSettingValue(settings.contact_phone);
+  const socialItems = [
+    cleanSiteSettingValue(settings.facebook_label) ? "f" : null,
+    lineLabel ? "LINE" : null,
+    siteName ? "GF" : null,
+  ].filter((item): item is string => Boolean(item));
+
   return (
     <footer className="mt-12 border-t border-white/5 bg-[rgba(18,16,26,0.35)]">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 lg:grid-cols-[1.2fr_0.8fr_1fr]">
         <div>
           <div className="relative h-20 w-64">
             <Image
-              alt="Good Friend Shop"
+              alt={siteName}
               className="object-contain object-left"
               fill
               sizes="256px"
-              src={assetPath("/figma/logo-goodfriend.webp")}
+              src={assetPath(logoPath)}
             />
           </div>
           <p className="mt-1 font-medium text-emerald-400">
-            เติมเกมไวเหมือนเพื่อนรู้ใจ ราคาสบายกระเป๋าที่สุด!
+            {settings.footer_tagline}
           </p>
           <p className="mt-5 max-w-md text-sm leading-7 text-white/80">
-            เกมเมอร์ทุกคนรู้ดีว่าการจะก้าวไปสู่จุดสูงสุดในเกมนั้น เวลาและเงินทุนคือสิ่งสำคัญ
-            GoodFriendShop เข้าใจคุณ เราคือเพื่อนแท้ของเกมเมอร์
+            {settings.footer_description}
           </p>
         </div>
         <div>
@@ -267,15 +287,23 @@ export function SiteFooter() {
           <div className="mt-6 space-y-4 text-sm text-white/85">
             <p className="flex items-center gap-3">
               <MessageCircle className="text-white" size={20} />
-              xxxxxxx
+              {lineLabel}
             </p>
             <p className="flex items-center gap-3">
               <Mail className="text-white" size={20} />
-              xxxxxxx@gmail.com
+              {emailLabel}
             </p>
+            {phoneLabel ? (
+              <p className="flex items-center gap-3">
+                <span className="grid h-5 w-5 place-items-center text-xs font-bold text-white">
+                  TEL
+                </span>
+                {phoneLabel}
+              </p>
+            ) : null}
           </div>
           <div className="mt-6 flex gap-3">
-            {["f", "LINE", "X"].map((item) => (
+            {socialItems.map((item) => (
               <span
                 className="grid h-11 min-w-11 place-items-center rounded-full bg-emerald-500 px-3 text-xs font-medium text-white"
                 key={item}
