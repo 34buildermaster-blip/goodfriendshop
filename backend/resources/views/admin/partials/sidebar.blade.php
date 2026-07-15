@@ -11,7 +11,9 @@
 <aside class="admin-sidebar" aria-label="Admin navigation">
     <div class="admin-sidebar-brand">
         <a class="admin-brand-lockup" href="{{ route('admin.dashboard') }}" aria-label="Good Friend Admin">
-            <span class="admin-brand-mark">GF</span>
+            <span class="admin-brand-mark">
+                <img src="{{ asset('figma/logo-goodfriend.webp') }}" alt="Good Friend Shop">
+            </span>
             <span class="admin-brand-copy">
                 <span>Good Friend</span>
                 <strong>Admin Center</strong>

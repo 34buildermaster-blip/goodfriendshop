@@ -185,15 +185,15 @@ function Header({
 }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#0e0d17]/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-[73px] max-w-[1440px] items-center gap-5 px-5 lg:px-11">
-        <Link className="relative flex h-12 w-[154px] shrink-0 items-center text-lg font-bold tracking-wide text-white" href="/">
+      <div className="mx-auto flex h-[82px] max-w-[1440px] items-center gap-5 px-5 lg:px-11">
+        <Link className="relative flex h-16 w-[230px] shrink-0 items-center text-lg font-bold tracking-wide text-white" href="/">
           {logoPath ? (
             <Image
               alt={logoText}
               className="object-contain object-left"
               fill
               priority
-              sizes="154px"
+              sizes="230px"
               src={assetPath(logoPath)}
             />
           ) : (
@@ -566,7 +566,7 @@ export default function Home() {
     <main className="min-h-screen overflow-hidden bg-[#0e0d17] text-white">
       <Header logoPath={siteSettings.logo_path} logoText={siteSettings.site_name} />
 
-      <section className="relative min-h-[860px] overflow-hidden pt-[73px]">
+      <section className="relative min-h-[860px] overflow-hidden pt-[82px]">
         {homeHeroSlides.map((slide, index) => (
           <Image
             alt={slide.title}
@@ -758,7 +758,15 @@ export default function Home() {
       <footer className="mt-12 border-t border-white/5 bg-[rgba(18,16,26,0.35)]">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 lg:grid-cols-[1.2fr_0.8fr_1fr]">
           <div>
-            <h2 className="text-3xl font-semibold text-white">{siteSettings.site_name}</h2>
+            <div className="relative h-20 w-64">
+              <Image
+                alt={siteSettings.site_name}
+                className="object-contain object-left"
+                fill
+                sizes="256px"
+                src={assetPath(siteSettings.logo_path ?? "/figma/logo-goodfriend.webp")}
+              />
+            </div>
             <p className="mt-1 font-medium text-emerald-400">
               {siteSettings.footer_tagline}
             </p>

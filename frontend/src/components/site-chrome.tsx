@@ -22,14 +22,14 @@ export function SiteHeader({
 }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#0e0d17]/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-[73px] max-w-[1440px] items-center gap-5 px-5 lg:px-11">
-        <Link className="relative flex h-12 w-[154px] shrink-0 items-center text-lg font-bold tracking-wide text-white" href="/">
+      <div className="mx-auto flex h-[82px] max-w-[1440px] items-center gap-5 px-5 lg:px-11">
+        <Link className="relative flex h-16 w-[230px] shrink-0 items-center text-lg font-bold tracking-wide text-white" href="/">
           <Image
             alt={logoText}
             className="object-contain object-left"
             fill
             priority
-            sizes="154px"
+            sizes="230px"
             src={assetPath(logoPath)}
           />
         </Link>
@@ -245,7 +245,15 @@ export function SiteFooter() {
     <footer className="mt-12 border-t border-white/5 bg-[rgba(18,16,26,0.35)]">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 lg:grid-cols-[1.2fr_0.8fr_1fr]">
         <div>
-          <h2 className="text-3xl font-semibold text-white">Good Friend Shop</h2>
+          <div className="relative h-20 w-64">
+            <Image
+              alt="Good Friend Shop"
+              className="object-contain object-left"
+              fill
+              sizes="256px"
+              src={assetPath("/figma/logo-goodfriend.webp")}
+            />
+          </div>
           <p className="mt-1 font-medium text-emerald-400">
             เติมเกมไวเหมือนเพื่อนรู้ใจ ราคาสบายกระเป๋าที่สุด!
           </p>
