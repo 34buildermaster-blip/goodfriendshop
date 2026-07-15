@@ -20,11 +20,15 @@ class GamePackageController extends Controller
         $this->ensureAdminAccess();
 
         return view('admin.products.packages-index', [
-            'packages' => GamePackage::query()
-                ->with('game')
+            'games' => Game::query()
+                ->with(['packages' => fn ($query) => $query
+                    ->orderBy('sort_order')
+                    ->orderBy('name')])
+                ->withCount('packages')
                 ->orderBy('sort_order')
                 ->orderBy('name')
-                ->paginate(20),
+                ->get(),
+            'packageTotal' => GamePackage::query()->count(),
             'requiredFieldLabels' => $this->requiredFieldLabels(),
             'statusLabels' => $this->statusLabels(),
         ]);

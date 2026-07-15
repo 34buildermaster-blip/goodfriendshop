@@ -107,6 +107,13 @@ class AdminProductManagementTest extends TestCase
             'sku' => 'PUBG-UC-325',
             'status' => GamePackage::STATUS_ACTIVE,
         ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.packages.index'))
+            ->assertOk()
+            ->assertSee('PUBG Mobile')
+            ->assertSee('UC 325')
+            ->assertSee('PUBG-UC-325');
     }
 
     public function test_customer_cannot_manage_products(): void
