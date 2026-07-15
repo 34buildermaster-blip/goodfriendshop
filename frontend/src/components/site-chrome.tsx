@@ -1,25 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Bell,
-  ClipboardList,
-  LogOut,
   Mail,
   Menu,
   MessageCircle,
   Search,
-  Settings,
   ShoppingBag,
-  UserRound,
 } from "lucide-react";
+import { AccountButton } from "@/components/account-button";
 import { navItems } from "@/lib/site-data";
 import { assetPath } from "@/lib/paths";
-
-const profileMenu = [
-  { label: "Orders", icon: ClipboardList, active: true },
-  { label: "Customers", icon: UserRound },
-  { label: "Settings", icon: Settings },
-];
 
 export function SiteHeader({ activeHref = "/" }: { activeHref?: string }) {
   return (
@@ -54,43 +44,7 @@ export function SiteHeader({ activeHref = "/" }: { activeHref?: string }) {
           <span className="text-xs">Search ...</span>
         </div>
 
-        <div className="group relative hidden items-center gap-3 lg:flex">
-          <div className="text-right leading-tight">
-            <p className="text-xs font-semibold text-white">Mark Collins</p>
-            <p className="text-[10px] text-emerald-400">Business man</p>
-          </div>
-          <button className="relative h-11 w-11 overflow-hidden rounded-full border border-white/20 bg-white/10">
-            <Image
-              alt="User profile"
-              className="object-cover"
-              fill
-              sizes="44px"
-              src={assetPath("/figma/game-mobile-legends.webp")}
-            />
-          </button>
-          <button className="absolute -right-5 -top-2 grid h-7 w-7 place-items-center rounded-full bg-white text-emerald-600">
-            <Bell size={14} />
-          </button>
-
-          <div className="invisible absolute right-0 top-14 w-60 translate-y-2 rounded-3xl border border-white/10 bg-[#111017]/90 p-4 opacity-0 shadow-2xl shadow-black/30 backdrop-blur-xl transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-            {profileMenu.map(({ active, icon: Icon, label }) => (
-              <button
-                className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm transition hover:bg-white/10 ${
-                  active ? "text-emerald-400" : "text-white"
-                }`}
-                key={label}
-              >
-                <Icon size={17} />
-                {label}
-              </button>
-            ))}
-            <div className="my-3 h-px bg-white/10" />
-            <button className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-white transition hover:bg-white/10">
-              <LogOut size={17} />
-              Log out
-            </button>
-          </div>
-        </div>
+        <AccountButton />
 
         <button className="ml-auto grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-white lg:hidden">
           <Menu size={22} />
