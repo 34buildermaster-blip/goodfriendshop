@@ -84,6 +84,34 @@ function statusTone(status: string) {
   return "border-amber-300/25 bg-amber-400/12 text-amber-100";
 }
 
+function statusPanelTone(status: string) {
+  if (status === "completed") {
+    return {
+      box: "border-emerald-300/25 bg-emerald-400/10",
+      icon: "text-emerald-300",
+    };
+  }
+
+  if (status === "cancelled") {
+    return {
+      box: "border-red-300/25 bg-red-400/10",
+      icon: "text-red-300",
+    };
+  }
+
+  if (status === "processing" || status === "paid") {
+    return {
+      box: "border-sky-300/25 bg-sky-400/10",
+      icon: "text-sky-300",
+    };
+  }
+
+  return {
+    box: "border-amber-300/25 bg-amber-400/10",
+    icon: "text-amber-200",
+  };
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<CustomerUser | null>(null);
@@ -877,6 +905,9 @@ function ProfileInput({
 }
 
 function OrderDetailCard({ loading, order }: { loading: boolean; order: OrderItem }) {
+  const panelTone = statusPanelTone(order.status);
+  const StatusIcon = order.status === "completed" ? BadgeCheck : order.status === "cancelled" ? AlertCircle : Clock;
+
   return (
     <section className="mt-6 rounded-3xl border border-emerald-300/15 bg-white/[0.04] p-5">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
@@ -899,10 +930,10 @@ function OrderDetailCard({ loading, order }: { loading: boolean; order: OrderIte
         </div>
       </div>
 
-      <div className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4">
+      <div className={`mt-5 rounded-2xl border p-4 ${panelTone.box}`}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-3">
-            <Clock className="mt-1 shrink-0 text-emerald-300" size={20} />
+            <StatusIcon className={`mt-1 shrink-0 ${panelTone.icon}`} size={20} />
             <div>
               <p className="font-semibold text-white">สถานะตอนนี้</p>
               <p className="mt-1 text-sm leading-6 text-white/62">
