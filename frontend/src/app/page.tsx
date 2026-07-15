@@ -44,6 +44,7 @@ const games = [
 type PremiumProduct = {
   id: string;
   title: string;
+  image?: string;
   price: string;
   duration: string;
   warranty: string;
@@ -279,10 +280,12 @@ function GameCard({
 }
 
 function PremiumCard({
+  image,
   onDetails,
   price,
   title,
 }: {
+  image?: string;
   onDetails: () => void;
   price: string;
   title: string;
@@ -295,7 +298,7 @@ function PremiumCard({
           className="object-cover"
           fill
           sizes="(min-width: 1024px) 420px, 90vw"
-          src={assetPath("/figma/premium-netflix.webp")}
+          src={assetPath(image ?? "/figma/premium-netflix.webp")}
         />
       </div>
       <div className="px-3 pb-2 pt-6">
@@ -376,7 +379,7 @@ function ProductDetailModal({
             className="object-cover"
             fill
             sizes="(min-width: 768px) 360px, 100vw"
-            src={assetPath("/figma/premium-netflix.webp")}
+            src={assetPath(product.image ?? "/figma/premium-netflix.webp")}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#101923] via-transparent to-transparent md:bg-gradient-to-r" />
         </div>
