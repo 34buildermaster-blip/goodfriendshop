@@ -16,6 +16,7 @@ import {
   Zap,
 } from "lucide-react";
 import { AccountButton } from "@/components/account-button";
+import { PremiumOrderModal } from "@/components/premium-order-modal";
 import { getGames, getNews, getPremiumProducts, getSiteContent } from "@/lib/api";
 import { assetPath } from "@/lib/paths";
 
@@ -282,11 +283,13 @@ function GameCard({
 function PremiumCard({
   image,
   onDetails,
+  onOrder,
   price,
   title,
 }: {
   image?: string;
   onDetails: () => void;
+  onOrder: () => void;
   price: string;
   title: string;
 }) {
@@ -321,6 +324,7 @@ function PremiumCard({
           </button>
           <button
             className="flex h-10 items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 text-sm font-semibold text-white transition hover:bg-emerald-400"
+            onClick={onOrder}
             type="button"
           >
             <ShoppingBag size={16} />
@@ -334,9 +338,11 @@ function PremiumCard({
 
 function ProductDetailModal({
   onClose,
+  onOrder,
   product,
 }: {
   onClose: () => void;
+  onOrder: () => void;
   product: PremiumProduct;
 }) {
   useEffect(() => {
@@ -433,6 +439,7 @@ function ProductDetailModal({
             </div>
             <button
               className="flex h-12 items-center justify-center gap-2 rounded-full bg-emerald-500 px-7 text-base font-semibold text-white transition hover:bg-emerald-400"
+              onClick={onOrder}
               type="button"
             >
               <ShoppingBag size={18} />
@@ -522,6 +529,9 @@ export default function Home() {
     contact_email: "xxxxxx@gmail.com",
   });
   const [selectedProduct, setSelectedProduct] = useState<PremiumProduct | null>(
+    null,
+  );
+  const [orderingProduct, setOrderingProduct] = useState<PremiumProduct | null>(
     null,
   );
   const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
@@ -737,6 +747,7 @@ export default function Home() {
               key={product.id}
               {...product}
               onDetails={() => setSelectedProduct(product)}
+              onOrder={() => setOrderingProduct(product)}
             />
           ))}
         </div>
@@ -827,7 +838,18 @@ export default function Home() {
       {selectedProduct ? (
         <ProductDetailModal
           onClose={() => setSelectedProduct(null)}
+          onOrder={() => {
+            setOrderingProduct(selectedProduct);
+            setSelectedProduct(null);
+          }}
           product={selectedProduct}
+        />
+      ) : null}
+
+      {orderingProduct ? (
+        <PremiumOrderModal
+          onClose={() => setOrderingProduct(null)}
+          product={orderingProduct}
         />
       ) : null}
     </main>

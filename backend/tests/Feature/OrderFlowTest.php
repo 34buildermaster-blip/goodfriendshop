@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Game;
 use App\Models\GamePackage;
 use App\Models\Order;
+use App\Models\PremiumApp;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -39,6 +40,41 @@ class OrderFlowTest extends TestCase
             'player_identifier' => '123456789',
             'game_name' => 'Mobile Legends',
             'package_name' => '257 Diamonds',
+        ]);
+    }
+
+    public function test_guest_can_create_order_from_active_premium_app(): void
+    {
+        $app = PremiumApp::create([
+            'name' => 'Spotify Premium 30 Days',
+            'slug' => 'spotify-premium-30-days',
+            'description' => 'Premium app package',
+            'price' => 89,
+            'currency' => 'THB',
+            'status' => PremiumApp::STATUS_ACTIVE,
+        ]);
+
+        $response = $this->postJson('/api/orders', [
+            'premium_app_id' => $app->slug,
+            'customer_name' => 'Somchai',
+            'customer_email' => 'somchai@example.com',
+            'customer_phone' => '0812345678',
+            'player_identifier' => 'somchai@example.com',
+            'customer_note' => 'Use on mobile',
+        ]);
+
+        $response
+            ->assertCreated()
+            ->assertJsonPath('data.game_name', 'Premium App')
+            ->assertJsonPath('data.package_name', 'Spotify Premium 30 Days')
+            ->assertJsonPath('data.status', Order::STATUS_PENDING);
+
+        $this->assertDatabaseHas('orders', [
+            'premium_app_id' => $app->id,
+            'customer_name' => 'Somchai',
+            'player_identifier' => 'somchai@example.com',
+            'game_name' => 'Premium App',
+            'package_name' => 'Spotify Premium 30 Days',
         ]);
     }
 

@@ -323,7 +323,8 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
 
     Route::post('/orders', function (Request $request) use ($resolveApiUser, $orderPayload) {
         $data = $request->validate([
-            'game_package_id' => ['required', 'integer', 'exists:game_packages,id'],
+            'game_package_id' => ['nullable', 'required_without:premium_app_id', 'integer', 'exists:game_packages,id'],
+            'premium_app_id' => ['nullable', 'required_without:game_package_id', 'string', 'max:180'],
             'customer_name' => ['nullable', 'string', 'max:160'],
             'customer_email' => ['nullable', 'email', 'max:160'],
             'customer_phone' => ['nullable', 'string', 'max:30'],
@@ -333,13 +334,27 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
             'customer_note' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $package = GamePackage::query()
-            ->with('game')
-            ->whereKey($data['game_package_id'])
-            ->where('status', GamePackage::STATUS_ACTIVE)
-            ->firstOrFail();
+        $package = null;
+        $premiumApp = null;
 
-        abort_unless($package->game?->status === Game::STATUS_ACTIVE, 404);
+        if (filled($data['game_package_id'] ?? null)) {
+            $package = GamePackage::query()
+                ->with('game')
+                ->whereKey($data['game_package_id'])
+                ->where('status', GamePackage::STATUS_ACTIVE)
+                ->firstOrFail();
+
+            abort_unless($package->game?->status === Game::STATUS_ACTIVE, 404);
+        }
+
+        if (filled($data['premium_app_id'] ?? null)) {
+            $premiumApp = PremiumApp::query()
+                ->where(fn ($query) => $query
+                    ->whereKey($data['premium_app_id'])
+                    ->orWhere('slug', $data['premium_app_id']))
+                ->where('status', PremiumApp::STATUS_ACTIVE)
+                ->firstOrFail();
+        }
 
         $user = $resolveApiUser($request);
 
@@ -352,18 +367,22 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
 
         $order = Order::create([
             'user_id' => $user?->id,
-            'game_id' => $package->game_id,
-            'game_package_id' => $package->id,
+            'game_id' => $package?->game_id,
+            'game_package_id' => $package?->id,
+            'premium_app_id' => $premiumApp?->id,
             'customer_name' => $data['customer_name'] ?? $user?->name,
             'customer_email' => $data['customer_email'] ?? $user?->email,
             'customer_phone' => $data['customer_phone'] ?? $user?->phone,
             'player_identifier' => $data['player_identifier'],
             'server_identifier' => $data['server_identifier'] ?? null,
-            'extra_fields' => $data['extra_fields'] ?? null,
-            'game_name' => $package->game->name,
-            'package_name' => $package->name,
-            'price' => $package->price,
-            'currency' => $package->currency,
+            'extra_fields' => [
+                ...($data['extra_fields'] ?? []),
+                ...($premiumApp ? ['premium_app_slug' => $premiumApp->slug] : []),
+            ],
+            'game_name' => $package?->game->name ?? 'Premium App',
+            'package_name' => $package?->name ?? $premiumApp->name,
+            'price' => $package?->price ?? $premiumApp->price,
+            'currency' => $package?->currency ?? $premiumApp->currency,
             'status' => Order::STATUS_PENDING,
             'customer_note' => $data['customer_note'] ?? null,
         ]);

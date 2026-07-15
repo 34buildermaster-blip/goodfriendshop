@@ -77,7 +77,8 @@ export type OrderItem = {
 };
 
 export type CreateOrderPayload = {
-  game_package_id: number | string;
+  game_package_id?: number | string;
+  premium_app_id?: number | string;
   customer_name?: string;
   customer_email?: string;
   customer_phone?: string;

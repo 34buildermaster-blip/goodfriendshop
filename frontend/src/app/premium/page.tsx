@@ -9,15 +9,18 @@ import {
   SiteFooter,
   SiteHeader,
 } from "@/components/site-chrome";
+import { PremiumOrderModal } from "@/components/premium-order-modal";
 import { getPremiumProducts, type PremiumProductItem } from "@/lib/api";
 import { premiumProducts as fallbackPremiumProducts } from "@/lib/site-data";
 import { assetPath } from "@/lib/paths";
 
 function PremiumProductCard({
   onDetails,
+  onOrder,
   product,
 }: {
   onDetails: () => void;
+  onOrder: () => void;
   product: PremiumProductItem;
 }) {
   return (
@@ -53,6 +56,7 @@ function PremiumProductCard({
           </button>
           <button
             className="flex h-10 items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 text-sm font-semibold text-white transition hover:bg-emerald-400"
+            onClick={onOrder}
             type="button"
           >
             <ShoppingBag size={16} />
@@ -66,9 +70,11 @@ function PremiumProductCard({
 
 function ProductDetailModal({
   onClose,
+  onOrder,
   product,
 }: {
   onClose: () => void;
+  onOrder: () => void;
   product: PremiumProductItem;
 }) {
   useEffect(() => {
@@ -163,6 +169,7 @@ function ProductDetailModal({
             </div>
             <button
               className="flex h-12 items-center justify-center gap-2 rounded-full bg-emerald-500 px-7 text-base font-semibold text-white transition hover:bg-emerald-400"
+              onClick={onOrder}
               type="button"
             >
               <ShoppingBag size={18} />
@@ -180,6 +187,9 @@ export default function PremiumPage() {
     fallbackPremiumProducts,
   );
   const [selectedProduct, setSelectedProduct] = useState<PremiumProductItem | null>(
+    null,
+  );
+  const [orderingProduct, setOrderingProduct] = useState<PremiumProductItem | null>(
     null,
   );
 
@@ -216,6 +226,7 @@ export default function PremiumPage() {
               <PremiumProductCard
                 key={product.id}
                 onDetails={() => setSelectedProduct(product)}
+                onOrder={() => setOrderingProduct(product)}
                 product={product}
               />
             ))}
@@ -227,7 +238,18 @@ export default function PremiumPage() {
       {selectedProduct ? (
         <ProductDetailModal
           onClose={() => setSelectedProduct(null)}
+          onOrder={() => {
+            setOrderingProduct(selectedProduct);
+            setSelectedProduct(null);
+          }}
           product={selectedProduct}
+        />
+      ) : null}
+
+      {orderingProduct ? (
+        <PremiumOrderModal
+          onClose={() => setOrderingProduct(null)}
+          product={orderingProduct}
         />
       ) : null}
     </main>

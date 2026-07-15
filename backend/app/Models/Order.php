@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
     'user_id',
     'game_id',
     'game_package_id',
+    'premium_app_id',
     'customer_name',
     'customer_email',
     'customer_phone',
@@ -65,6 +66,11 @@ class Order extends Model
     public function package(): BelongsTo
     {
         return $this->belongsTo(GamePackage::class, 'game_package_id');
+    }
+
+    public function premiumApp(): BelongsTo
+    {
+        return $this->belongsTo(PremiumApp::class);
     }
 
     protected static function booted(): void
