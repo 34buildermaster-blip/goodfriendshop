@@ -42,6 +42,7 @@ export type CustomerUser = {
   email: string;
   phone?: string | null;
   line_id?: string | null;
+  avatar_url?: string | null;
 };
 
 export type AuthResponse = {
@@ -157,6 +158,13 @@ function normalizeMediaUrl(value: unknown, fallback: string) {
   return value;
 }
 
+function normalizeCustomerUser(user: CustomerUser): CustomerUser {
+  return {
+    ...user,
+    avatar_url: normalizeMediaUrl(user.avatar_url, ""),
+  };
+}
+
 async function requestData<T>(path: string): Promise<T | null> {
   try {
     const response = await fetch(`${apiBaseUrl}${path}`, {
@@ -209,6 +217,32 @@ async function sendData<T>(
   return "data" in Object(payload) ? ((payload as ApiPayload<T>).data as T) : (payload as T);
 }
 
+async function sendFormData<T>(path: string, body: FormData, token?: string | null): Promise<T> {
+  const response = await fetch(`${apiBaseUrl}${path}`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body,
+  });
+
+  const payload = (await response.json().catch(() => ({}))) as
+    | ApiPayload<T>
+    | { message?: string; errors?: Record<string, string[]> };
+
+  if (!response.ok) {
+    const message =
+      "message" in payload && typeof payload.message === "string"
+        ? payload.message
+        : "ไม่สามารถอัปโหลดไฟล์ได้ในตอนนี้";
+    throw new Error(message);
+  }
+
+  return "data" in Object(payload) ? ((payload as ApiPayload<T>).data as T) : (payload as T);
+}
+
 export async function getGames(): Promise<GameItem[]> {
   const data = await requestData<GameItem[]>("/games");
   const source = data?.length ? data : fallbackGames;
@@ -239,7 +273,12 @@ export async function createOrder(payload: CreateOrderPayload, token?: string | 
 }
 
 export async function loginCustomer(email: string, password: string) {
-  return sendData<AuthResponse>("/auth/login", { email, password });
+  const response = await sendData<AuthResponse>("/auth/login", { email, password });
+
+  return {
+    ...response,
+    user: normalizeCustomerUser(response.user),
+  };
 }
 
 export async function registerCustomer(payload: {
@@ -249,11 +288,16 @@ export async function registerCustomer(payload: {
   line_id?: string;
   password: string;
 }) {
-  return sendData<AuthResponse>("/auth/register", payload);
+  const response = await sendData<AuthResponse>("/auth/register", payload);
+
+  return {
+    ...response,
+    user: normalizeCustomerUser(response.user),
+  };
 }
 
 export async function getCurrentCustomer(token: string) {
-  return sendData<CustomerUser>("/auth/me", undefined, token, "GET");
+  return normalizeCustomerUser(await sendData<CustomerUser>("/auth/me", undefined, token, "GET"));
 }
 
 export async function updateCurrentCustomer(
@@ -263,7 +307,14 @@ export async function updateCurrentCustomer(
     line_id?: string | null;
   },
 ) {
-  return sendData<CustomerUser>("/auth/me", payload, token, "PATCH");
+  return normalizeCustomerUser(await sendData<CustomerUser>("/auth/me", payload, token, "PATCH"));
+}
+
+export async function uploadCurrentCustomerAvatar(token: string, file: File) {
+  const body = new FormData();
+  body.append("avatar", file);
+
+  return normalizeCustomerUser(await sendFormData<CustomerUser>("/auth/me/avatar", body, token));
 }
 
 export async function logoutCustomer(token: string) {

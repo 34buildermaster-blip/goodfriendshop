@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -7,6 +8,7 @@ import {
   AlertCircle,
   BadgeCheck,
   Bell,
+  Camera,
   ChevronRight,
   CheckCircle2,
   Clock,
@@ -34,6 +36,7 @@ import {
   getMyOrder,
   getMyOrders,
   logoutCustomer,
+  uploadCurrentCustomerAvatar,
   updateCurrentCustomer,
   type CustomerUser,
   type OrderItem,
@@ -91,6 +94,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<ProfileTab>("overview");
   const [editingProfile, setEditingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
   const [profileError, setProfileError] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<OrderItem | null>(null);
@@ -206,6 +210,12 @@ export default function ProfilePage() {
     setEditingProfile(false);
   }
 
+  function persistCurrentUser(updatedUser: CustomerUser) {
+    setUser(updatedUser);
+    window.localStorage.setItem("gfs_user", JSON.stringify(updatedUser));
+    window.dispatchEvent(new Event("gfs:user-updated"));
+  }
+
   async function handleSaveProfile() {
     const token = window.localStorage.getItem("gfs_token");
 
@@ -226,20 +236,58 @@ export default function ProfilePage() {
         line_id: profileForm.line_id || null,
       });
 
-      setUser(updatedUser);
+      persistCurrentUser(updatedUser);
       setProfileForm({
         name: updatedUser.name,
         email: updatedUser.email,
         phone: updatedUser.phone ?? "",
         line_id: updatedUser.line_id ?? "",
       });
-      window.localStorage.setItem("gfs_user", JSON.stringify(updatedUser));
       setEditingProfile(false);
       setProfileMessage("บันทึกข้อมูลสมาชิกเรียบร้อยแล้ว");
     } catch (caught) {
       setProfileError(caught instanceof Error ? caught.message : "บันทึกข้อมูลไม่สำเร็จ");
     } finally {
       setSavingProfile(false);
+    }
+  }
+
+  async function handleAvatarUpload(file: File | null) {
+    const token = window.localStorage.getItem("gfs_token");
+
+    if (!file) {
+      return;
+    }
+
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const allowedTypes = ["image/webp", "image/png", "image/jpeg"];
+
+    if (!allowedTypes.includes(file.type)) {
+      setProfileError("รองรับเฉพาะไฟล์ PNG, JPG หรือ WebP");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setProfileError("ไฟล์รูปโปรไฟล์ต้องไม่เกิน 2MB");
+      return;
+    }
+
+    setAvatarUploading(true);
+    setProfileError("");
+    setProfileMessage("");
+
+    try {
+      const updatedUser = await uploadCurrentCustomerAvatar(token, file);
+      persistCurrentUser(updatedUser);
+      setProfileMessage("อัปโหลดรูปโปรไฟล์เรียบร้อยแล้ว");
+    } catch (caught) {
+      setProfileError(caught instanceof Error ? caught.message : "อัปโหลดรูปโปรไฟล์ไม่สำเร็จ");
+    } finally {
+      setAvatarUploading(false);
     }
   }
 
@@ -269,9 +317,7 @@ export default function ProfilePage() {
         <section className="mx-auto grid max-w-[1480px] gap-6 px-5 pb-16 lg:grid-cols-[292px_minmax(0,1fr)]">
           <aside className="rounded-[28px] border border-white/10 bg-[#121821]/92 p-4 shadow-2xl shadow-black/20 lg:sticky lg:top-28 lg:h-[calc(100vh-8rem)]">
             <div className="flex items-center gap-3 rounded-3xl bg-white/[0.04] p-4">
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-emerald-400 text-lg font-bold text-[#06140f]">
-                {user ? initials(user.name) : "GF"}
-              </div>
+              <ProfileAvatar className="h-14 w-14 rounded-2xl text-lg" user={user} />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-white">
                   {user?.name ?? "Good Friend Member"}
@@ -413,13 +459,29 @@ export default function ProfilePage() {
 
                   <div className="grid gap-6 p-5 lg:grid-cols-[320px_1fr] lg:p-7">
                     <div className="flex items-center gap-5">
-                      <div className="grid h-28 w-28 shrink-0 place-items-center rounded-full bg-gradient-to-br from-emerald-300 to-cyan-300 text-3xl font-bold text-[#062016] shadow-lg">
-                        {initials(user.name)}
+                      <div className="relative shrink-0">
+                        <ProfileAvatar className="h-28 w-28 text-3xl shadow-lg" user={user} />
+                        <label className="absolute bottom-0 right-0 grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-white/20 bg-emerald-500 text-white shadow-lg transition hover:bg-emerald-400">
+                          <Camera size={18} />
+                          <input
+                            accept="image/png,image/jpeg,image/webp"
+                            className="sr-only"
+                            disabled={avatarUploading}
+                            onChange={(event) => {
+                              void handleAvatarUpload(event.target.files?.[0] ?? null);
+                              event.target.value = "";
+                            }}
+                            type="file"
+                          />
+                        </label>
                       </div>
                       <div className="min-w-0">
                         <h1 className="truncate text-3xl font-bold text-white">{user.name}</h1>
                         <p className="mt-2 text-sm font-semibold text-emerald-300">UID</p>
                         <p className="mt-1 break-all text-sm text-white/58">GF-{String(user.id).padStart(6, "0")}</p>
+                        <p className="mt-2 text-xs text-white/45">
+                          {avatarUploading ? "กำลังอัปโหลดรูป..." : "รูปโปรไฟล์แนะนำ 512x512px / PNG, JPG, WebP ไม่เกิน 2MB"}
+                        </p>
                       </div>
                     </div>
 
@@ -676,6 +738,35 @@ function InfoField({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
       <p className="text-sm font-semibold text-emerald-300">{label}</p>
       <p className="mt-2 min-h-6 break-words text-base font-bold text-white">{value}</p>
+    </div>
+  );
+}
+
+function ProfileAvatar({
+  className,
+  user,
+}: {
+  className: string;
+  user: CustomerUser | null;
+}) {
+  return (
+    <div
+      className={`grid shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-300 to-cyan-300 font-bold text-[#062016] ${className}`}
+    >
+      {user?.avatar_url ? (
+        <Image
+          alt={user.name}
+          className="h-full w-full object-cover"
+          height={112}
+          src={user.avatar_url}
+          unoptimized
+          width={112}
+        />
+      ) : user ? (
+        initials(user.name)
+      ) : (
+        "GF"
+      )}
     </div>
   );
 }

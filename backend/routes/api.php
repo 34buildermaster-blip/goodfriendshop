@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -47,6 +48,7 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
         'email' => $user->email,
         'phone' => $user->phone,
         'line_id' => $user->line_id,
+        'avatar_url' => $user->avatarUrl(),
     ];
 
     $orderStatusSteps = function (Order $order): array {
@@ -182,6 +184,28 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
         ]);
 
         $user->update($data);
+
+        return response()->json(['data' => $userPayload($user->refresh())]);
+    });
+
+    Route::post('/auth/me/avatar', function (Request $request) use ($resolveApiUser, $userPayload) {
+        $user = $resolveApiUser($request);
+
+        abort_unless($user, 401);
+
+        $data = $request->validate([
+            'avatar' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        if ($user->avatar_path && ! Str::startsWith($user->avatar_path, ['http://', 'https://', '/'])) {
+            Storage::disk('public')->delete($user->avatar_path);
+        }
+
+        $file = $data['avatar'];
+        $extension = $file->extension() ?: 'webp';
+        $path = $file->storeAs('avatars', "user-{$user->id}-".Str::uuid().".{$extension}", 'public');
+
+        $user->forceFill(['avatar_path' => $path])->save();
 
         return response()->json(['data' => $userPayload($user->refresh())]);
     });

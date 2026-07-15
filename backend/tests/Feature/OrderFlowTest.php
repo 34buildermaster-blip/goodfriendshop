@@ -7,6 +7,8 @@ use App\Models\GamePackage;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class OrderFlowTest extends TestCase
@@ -75,6 +77,8 @@ class OrderFlowTest extends TestCase
 
     public function test_customer_can_update_profile_and_view_order_detail(): void
     {
+        Storage::fake('public');
+
         $package = $this->createActivePackage();
         $register = $this->postJson('/api/auth/register', [
             'name' => 'Customer One',
@@ -93,6 +97,22 @@ class OrderFlowTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.name', 'Customer Updated')
             ->assertJsonPath('data.line_id', 'goodfriendline');
+
+        $avatarResponse = $this->post('/api/auth/me/avatar', [
+            'avatar' => UploadedFile::fake()->createWithContent(
+                'avatar.png',
+                base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=')
+            ),
+        ], [
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer {$token}",
+        ])->assertOk();
+
+        $avatarPath = User::query()->where('email', 'updated@example.com')->value('avatar_path');
+
+        $this->assertNotEmpty($avatarResponse->json('data.avatar_url'));
+        $this->assertNotEmpty($avatarPath);
+        Storage::disk('public')->assertExists($avatarPath);
 
         $orderNumber = $this->postJson('/api/orders', [
             'game_package_id' => $package->id,

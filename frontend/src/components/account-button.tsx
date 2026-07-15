@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -23,7 +24,7 @@ export function AccountButton() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
+    function syncStoredUser() {
       const token = window.localStorage.getItem("gfs_token");
       const storedUser = window.localStorage.getItem("gfs_user");
 
@@ -34,10 +35,19 @@ export function AccountButton() {
         } catch {
           window.localStorage.removeItem("gfs_user");
         }
+      } else {
+        setUser(null);
       }
-    }, 0);
+    }
 
-    return () => window.clearTimeout(timeoutId);
+    const timeoutId = window.setTimeout(syncStoredUser, 0);
+
+    window.addEventListener("gfs:user-updated", syncStoredUser);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener("gfs:user-updated", syncStoredUser);
+    };
   }, []);
 
   useEffect(() => {
@@ -86,9 +96,7 @@ export function AccountButton() {
         onClick={() => setOpen((current) => !current)}
         type="button"
       >
-        <span className="grid h-7 w-7 place-items-center rounded-full bg-emerald-400 text-xs font-bold text-[#06140f]">
-          {user?.name ? user.name.charAt(0).toUpperCase() : <UserRound size={15} />}
-        </span>
+        <AccountAvatar className="h-7 w-7 text-xs" user={user} />
         <span className="max-w-28 truncate">{user?.name ?? "Account"}</span>
         <ChevronDown
           className={`transition ${open ? "rotate-180 text-emerald-300" : "text-white/70"}`}
@@ -103,9 +111,7 @@ export function AccountButton() {
         >
           <div className="rounded-2xl bg-white/[0.04] p-4">
             <div className="flex items-center gap-3">
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-emerald-400 text-base font-bold text-[#06140f]">
-                {user?.name ? user.name.charAt(0).toUpperCase() : "GF"}
-              </div>
+              <AccountAvatar className="h-11 w-11 rounded-2xl text-base" user={user} />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">
                   {user?.name ?? "Good Friend Member"}
@@ -145,6 +151,35 @@ export function AccountButton() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+function AccountAvatar({
+  className,
+  user,
+}: {
+  className: string;
+  user: CustomerUser | null;
+}) {
+  return (
+    <span
+      className={`grid shrink-0 place-items-center overflow-hidden rounded-full bg-emerald-400 font-bold text-[#06140f] ${className}`}
+    >
+      {user?.avatar_url ? (
+        <Image
+          alt={user.name}
+          className="h-full w-full object-cover"
+          height={48}
+          src={user.avatar_url}
+          unoptimized
+          width={48}
+        />
+      ) : user?.name ? (
+        user.name.charAt(0).toUpperCase()
+      ) : (
+        <UserRound size={15} />
+      )}
+    </span>
   );
 }
 
