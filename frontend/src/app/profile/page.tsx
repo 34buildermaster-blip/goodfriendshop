@@ -10,7 +10,6 @@ import {
   Bell,
   Camera,
   ChevronRight,
-  CheckCircle2,
   Clock,
   Coins,
   CreditCard,
@@ -878,16 +877,6 @@ function ProfileInput({
 }
 
 function OrderDetailCard({ loading, order }: { loading: boolean; order: OrderItem }) {
-  const steps =
-    order.status_steps?.length
-      ? order.status_steps
-      : [
-          { key: "pending", label: "รับออเดอร์", state: order.status === "pending" ? "current" : "done" as const },
-          { key: "paid", label: "ชำระเงิน", state: order.status === "paid" ? "current" : "upcoming" as const },
-          { key: "processing", label: "กำลังดำเนินการ", state: order.status === "processing" ? "current" : "upcoming" as const },
-          { key: "completed", label: "สำเร็จ", state: order.status === "completed" ? "current" : "upcoming" as const },
-        ];
-
   return (
     <section className="mt-6 rounded-3xl border border-emerald-300/15 bg-white/[0.04] p-5">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
@@ -910,42 +899,21 @@ function OrderDetailCard({ loading, order }: { loading: boolean; order: OrderIte
         </div>
       </div>
 
-      <div className="mt-5 rounded-2xl border border-white/10 bg-black/10 p-4">
-        <div className="flex gap-3">
-          <Clock className="mt-1 shrink-0 text-emerald-300" size={20} />
-          <div>
-            <p className="font-semibold text-white">สถานะตอนนี้: {order.status_label}</p>
-            <p className="mt-1 text-sm leading-6 text-white/62">
-              {loading ? "กำลังโหลดรายละเอียดล่าสุด..." : (order.next_action ?? "รออัปเดตจากทีมงาน")}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-5 grid gap-3 md:grid-cols-4">
-        {steps.map((step) => (
-          <div
-            className={`rounded-2xl border p-4 ${
-              step.state === "done"
-                ? "border-emerald-300/25 bg-emerald-400/10"
-                : step.state === "current"
-                  ? "border-[#ffc012]/35 bg-[#ffc012]/10"
-                  : "border-white/10 bg-white/[0.03]"
-            }`}
-            key={step.key}
-          >
-            <div className="flex items-center gap-2">
-              {step.state === "done" ? (
-                <CheckCircle2 className="text-emerald-300" size={18} />
-              ) : step.state === "current" ? (
-                <Clock className="text-[#ffc012]" size={18} />
-              ) : (
-                <span className="h-[18px] w-[18px] rounded-full border border-white/20" />
-              )}
-              <p className="text-sm font-bold text-white">{step.label}</p>
+      <div className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-3">
+            <Clock className="mt-1 shrink-0 text-emerald-300" size={20} />
+            <div>
+              <p className="font-semibold text-white">สถานะตอนนี้</p>
+              <p className="mt-1 text-sm leading-6 text-white/62">
+                {loading ? "กำลังโหลดรายละเอียดล่าสุด..." : (order.next_action ?? "รออัปเดตจากทีมงาน")}
+              </p>
             </div>
           </div>
-        ))}
+          <span className={`inline-flex h-10 shrink-0 items-center justify-center rounded-full border px-4 text-sm font-bold ${statusTone(order.status)}`}>
+            {order.status_label}
+          </span>
+        </div>
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-3">
