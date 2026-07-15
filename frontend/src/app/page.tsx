@@ -511,7 +511,7 @@ export default function Home() {
   ]);
   const [siteSettings, setSiteSettings] = useState({
     site_name: "Good Friend Shop",
-    logo_path: undefined as string | undefined,
+    logo_path: "/figma/logo-goodfriend.webp" as string | undefined,
     footer_tagline: "เติมเกมไวเหมือนเพื่อนรู้ใจ ราคาสบายกระเป๋าที่สุด!",
     footer_description:
       "GoodFriendShop คือเพื่อนแท้ของเกมเมอร์ พร้อมสนับสนุนให้คุณเล่นต่อได้ไม่มีสะดุด",

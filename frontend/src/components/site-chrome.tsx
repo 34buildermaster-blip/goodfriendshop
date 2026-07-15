@@ -11,12 +11,27 @@ import { AccountButton } from "@/components/account-button";
 import { navItems } from "@/lib/site-data";
 import { assetPath } from "@/lib/paths";
 
-export function SiteHeader({ activeHref = "/" }: { activeHref?: string }) {
+export function SiteHeader({
+  activeHref = "/",
+  logoPath = "/figma/logo-goodfriend.webp",
+  logoText = "Good Friend Shop",
+}: {
+  activeHref?: string;
+  logoPath?: string;
+  logoText?: string;
+}) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#0e0d17]/80 backdrop-blur-xl">
       <div className="mx-auto flex h-[73px] max-w-[1440px] items-center gap-5 px-5 lg:px-11">
-        <Link className="shrink-0 text-lg font-bold tracking-wide text-white" href="/">
-          LOGO
+        <Link className="relative flex h-12 w-[154px] shrink-0 items-center text-lg font-bold tracking-wide text-white" href="/">
+          <Image
+            alt={logoText}
+            className="object-contain object-left"
+            fill
+            priority
+            sizes="154px"
+            src={assetPath(logoPath)}
+          />
         </Link>
 
         <nav className="hidden flex-1 items-center justify-center gap-8 text-sm font-medium text-white lg:flex">
