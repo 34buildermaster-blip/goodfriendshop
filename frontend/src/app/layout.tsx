@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://goodfriendshop.com";
+const siteTitle = "Good Friend Shop";
+const siteDescription =
+  "เว็บเติมเกมและร้านแอพพรีเมี่ยม Good Friend Shop เติมเกมไว ปลอดภัย และติดตามออเดอร์ได้ง่าย";
+const siteLogo = "/figma/logo-goodfriend.webp";
+
 const lineSeedSansTh = localFont({
   src: [
     {
@@ -20,8 +26,42 @@ const lineSeedSansTh = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Good Friend Shop",
-  description: "เว็บเติมเกมและร้านแอพพรีเมี่ยม Good Friend Shop",
+  metadataBase: new URL(siteUrl),
+  applicationName: siteTitle,
+  title: {
+    default: siteTitle,
+    template: `%s | ${siteTitle}`,
+  },
+  description: siteDescription,
+  alternates: {
+    canonical: "/",
+  },
+  icons: {
+    icon: [{ url: siteLogo, type: "image/webp" }],
+    shortcut: [{ url: siteLogo, type: "image/webp" }],
+  },
+  openGraph: {
+    title: siteTitle,
+    description: siteDescription,
+    url: "/",
+    siteName: siteTitle,
+    images: [
+      {
+        url: siteLogo,
+        width: 800,
+        height: 800,
+        alt: siteTitle,
+      },
+    ],
+    locale: "th_TH",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: siteTitle,
+    description: siteDescription,
+    images: [siteLogo],
+  },
 };
 
 export default function RootLayout({
