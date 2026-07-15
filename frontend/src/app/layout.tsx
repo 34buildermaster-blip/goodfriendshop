@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { FloatingAdminChat } from "@/components/floating-admin-chat";
 import "./globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://goodfriendshop.com";
@@ -75,7 +76,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th" className={`${lineSeedSansTh.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <FloatingAdminChat />
+      </body>
     </html>
   );
 }
