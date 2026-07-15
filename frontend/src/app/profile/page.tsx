@@ -33,6 +33,8 @@ import {
 
 type ProfileTab = "overview" | "contact" | "orders" | "payment";
 
+const profileTabIds: ProfileTab[] = ["overview", "contact", "orders", "payment"];
+
 const tabs: Array<{ id: ProfileTab; label: string; icon: typeof UserRound }> = [
   { id: "overview", label: "ข้อมูลผู้ใช้", icon: UserRound },
   { id: "contact", label: "ช่องทางติดต่อ", icon: MessageCircle },
@@ -82,6 +84,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const token = window.localStorage.getItem("gfs_token");
+    const requestedTab = new URLSearchParams(window.location.search).get("tab");
+
+    if (profileTabIds.includes(requestedTab as ProfileTab)) {
+      queueMicrotask(() => setActiveTab(requestedTab as ProfileTab));
+    }
 
     if (!token) {
       queueMicrotask(() => setLoading(false));
@@ -231,7 +238,10 @@ export default function ProfilePage() {
                               : "bg-white/[0.06] text-white/74 hover:bg-white/12 hover:text-white"
                           }`}
                           key={id}
-                          onClick={() => setActiveTab(id)}
+                          onClick={() => {
+                            setActiveTab(id);
+                            window.history.replaceState(null, "", id === "overview" ? "/profile" : `/profile?tab=${id}`);
+                          }}
                           type="button"
                         >
                           <Icon size={17} />
