@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class AuthFlowTest extends TestCase
@@ -71,5 +72,56 @@ class AuthFlowTest extends TestCase
             ->assertSee('ภาพรวมระบบ')
             ->assertSee(route('admin.products.index'), false)
             ->assertSee(route('admin.users.index'), false);
+    }
+
+    public function test_google_callback_creates_customer_and_redirects_with_token(): void
+    {
+        config([
+            'services.google.client_id' => 'google-client-id',
+            'services.google.client_secret' => 'google-client-secret',
+            'services.google.redirect' => 'http://127.0.0.1:8001/auth/google/callback',
+        ]);
+
+        Http::fake([
+            'https://oauth2.googleapis.com/token' => Http::response([
+                'access_token' => 'google-access-token',
+                'token_type' => 'Bearer',
+            ]),
+            'https://openidconnect.googleapis.com/v1/userinfo' => Http::response([
+                'sub' => 'google-user-123',
+                'email' => 'google-user@goodfriendshop.test',
+                'email_verified' => true,
+                'name' => 'Google User',
+                'picture' => 'https://example.com/avatar.png',
+            ]),
+        ]);
+
+        $response = $this
+            ->withSession(['oauth_google_state' => 'valid-state'])
+            ->get('/auth/google/callback?code=valid-code&state=valid-state');
+
+        $this->assertStringStartsWith(
+            'http://127.0.0.1:3001/login/social-callback#payload=',
+            $response->headers->get('Location'),
+        );
+        $this->assertDatabaseHas('users', [
+            'email' => 'google-user@goodfriendshop.test',
+            'name' => 'Google User',
+            'role' => User::ROLE_CUSTOMER,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+        $this->assertDatabaseHas('social_accounts', [
+            'provider' => 'google',
+            'provider_user_id' => 'google-user-123',
+            'email' => 'google-user@goodfriendshop.test',
+        ]);
+    }
+
+    public function test_google_callback_rejects_invalid_state(): void
+    {
+        $this
+            ->withSession(['oauth_google_state' => 'valid-state'])
+            ->get('/auth/google/callback?code=valid-code&state=wrong-state')
+            ->assertRedirect('http://127.0.0.1:3001/login?social_error=invalid_state');
     }
 }

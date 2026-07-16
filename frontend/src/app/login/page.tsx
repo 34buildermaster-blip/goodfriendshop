@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { SiteHeader } from "@/components/site-chrome";
-import { loginCustomer } from "@/lib/api";
+import { backendBaseUrl, loginCustomer } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -54,6 +54,17 @@ export default function LoginPage() {
           <button className="mt-6 h-12 w-full rounded-full bg-emerald-500 font-semibold text-white transition hover:bg-emerald-400 disabled:opacity-60" disabled={loading} type="submit">
             {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
           </button>
+          <div className="my-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/36">
+            <span className="h-px flex-1 bg-white/10" />
+            หรือ
+            <span className="h-px flex-1 bg-white/10" />
+          </div>
+          <a
+            className="flex h-12 w-full items-center justify-center rounded-full border border-white/12 bg-white text-sm font-semibold text-[#111827] transition hover:bg-white/90"
+            href={`${backendBaseUrl}/auth/google/redirect`}
+          >
+            เข้าสู่ระบบด้วย Google
+          </a>
           <p className="mt-5 text-center text-sm text-white/65">
             ยังไม่มีบัญชี? <Link className="font-semibold text-emerald-300" href="/register">สมัครสมาชิก</Link>
           </p>

@@ -15,6 +15,8 @@ const backendOrigin = (() => {
   }
 })();
 
+export const backendBaseUrl = backendOrigin;
+
 export type GamePackageItem = {
   id: number | string;
   name: string;
