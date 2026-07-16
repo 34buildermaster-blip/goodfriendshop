@@ -83,6 +83,22 @@ export default function LoginPage() {
             </svg>
             เข้าสู่ระบบด้วย Google
           </a>
+          <a
+            className="mt-3 flex h-12 w-full items-center justify-center gap-3 rounded-full bg-[#06C755] text-sm font-semibold text-white shadow-sm transition hover:bg-[#05b84f] hover:shadow-md"
+            href={`${backendBaseUrl}/auth/line/redirect`}
+          >
+            <svg aria-hidden="true" className="h-6 w-6" viewBox="0 0 32 32">
+              <path
+                d="M16 4C8.83 4 3 8.67 3 14.42c0 5.16 4.59 9.49 10.79 10.31.42.09.99.28 1.14.64.13.33.08.84.04 1.17l-.18 1.11c-.06.33-.26 1.29 1.13.7 1.39-.58 7.5-4.42 10.24-7.57A9.2 9.2 0 0 0 29 14.42C29 8.67 23.17 4 16 4Z"
+                fill="white"
+              />
+              <path
+                d="M10.08 17.86h2.98v1.03H9.04v-6.08h1.04v5.05Zm4.43 1.03h-1.04v-6.08h1.04v6.08Zm5.95 0h-1.05l-2.75-4.1v4.1h-1.04v-6.08h1.05l2.75 4.1v-4.1h1.04v6.08Zm4.52-5.05h-2.7v1.39h2.41v1.01h-2.41v1.62h2.7v1.03h-3.74v-6.08h3.74v1.03Z"
+                fill="#06C755"
+              />
+            </svg>
+            เข้าสู่ระบบด้วย LINE
+          </a>
           <p className="mt-5 text-center text-sm text-white/65">
             ยังไม่มีบัญชี? <Link className="font-semibold text-emerald-300" href="/register">สมัครสมาชิก</Link>
           </p>

@@ -168,6 +168,65 @@ class AuthController extends Controller
         return redirect()->away($this->frontendUrl('/login/social-callback#payload='.rawurlencode($payload)));
     }
 
+    public function redirectToLine(Request $request): RedirectResponse
+    {
+        $state = Str::random(40);
+        $nonce = Str::random(40);
+        $request->session()->put('oauth_line_state', $state);
+        $request->session()->put('oauth_line_nonce', $nonce);
+
+        return redirect()->away('https://access.line.me/oauth2/v2.1/authorize?'.http_build_query([
+            'response_type' => 'code',
+            'client_id' => config('services.line.client_id'),
+            'redirect_uri' => config('services.line.redirect'),
+            'state' => $state,
+            'scope' => 'profile openid email',
+            'nonce' => $nonce,
+        ]));
+    }
+
+    public function handleLineCallback(Request $request): RedirectResponse
+    {
+        if ($request->filled('error')) {
+            return $this->redirectSocialFailure($request->string('error')->toString());
+        }
+
+        $expectedState = $request->session()->pull('oauth_line_state');
+        $request->session()->forget('oauth_line_nonce');
+
+        if (blank($expectedState) || ! hash_equals($expectedState, $request->string('state')->toString())) {
+            return $this->redirectSocialFailure('invalid_state');
+        }
+
+        $tokenResponse = Http::asForm()->post('https://api.line.me/oauth2/v2.1/token', [
+            'grant_type' => 'authorization_code',
+            'code' => $request->string('code')->toString(),
+            'redirect_uri' => config('services.line.redirect'),
+            'client_id' => config('services.line.client_id'),
+            'client_secret' => config('services.line.client_secret'),
+        ]);
+
+        if (! $tokenResponse->successful() || blank($tokenResponse->json('access_token'))) {
+            return $this->redirectSocialFailure('token_failed');
+        }
+
+        $profile = $this->lineProfileFromAccessToken((string) $tokenResponse->json('access_token'));
+
+        if (blank($profile['sub'] ?? $profile['userId'] ?? null)) {
+            return $this->redirectSocialFailure('profile_failed');
+        }
+
+        $user = $this->resolveLineUser($profile);
+        $token = $this->issueApiToken($user);
+
+        $payload = base64_encode(json_encode([
+            'token' => $token,
+            'user' => $this->userPayload($user),
+        ], JSON_THROW_ON_ERROR));
+
+        return redirect()->away($this->frontendUrl('/login/social-callback#payload='.rawurlencode($payload)));
+    }
+
     private function homeRouteFor(?User $user): string
     {
         return $user?->isAdmin() ? 'admin.dashboard' : 'profile.show';
@@ -222,6 +281,85 @@ class AuthController extends Controller
         SocialAccount::query()->updateOrCreate(
             [
                 'provider' => 'google',
+                'provider_user_id' => $providerId,
+            ],
+            [
+                'user_id' => $user->id,
+                'email' => $email,
+                'name' => $name,
+                'avatar_url' => $avatar,
+                'raw_profile' => $profile,
+                'last_login_at' => now(),
+            ],
+        );
+
+        return $user->refresh();
+    }
+
+    private function lineProfileFromAccessToken(string $accessToken): array
+    {
+        $profileResponse = Http::withToken($accessToken)
+            ->get('https://api.line.me/oauth2/v2.1/userinfo');
+
+        if ($profileResponse->successful() && filled($profileResponse->json('sub'))) {
+            return $profileResponse->json();
+        }
+
+        $legacyProfileResponse = Http::withToken($accessToken)
+            ->get('https://api.line.me/v2/profile');
+
+        return $legacyProfileResponse->successful() ? $legacyProfileResponse->json() : [];
+    }
+
+    private function resolveLineUser(array $profile): User
+    {
+        $providerId = (string) ($profile['sub'] ?? $profile['userId']);
+        $email = isset($profile['email']) ? Str::lower((string) $profile['email']) : null;
+        $name = (string) ($profile['name'] ?? $profile['displayName'] ?? 'LINE Member');
+        $avatar = isset($profile['picture']) ? (string) $profile['picture'] : ($profile['pictureUrl'] ?? null);
+
+        $socialAccount = SocialAccount::query()
+            ->where('provider', 'line')
+            ->where('provider_user_id', $providerId)
+            ->first();
+
+        if ($socialAccount) {
+            $user = $socialAccount->user;
+        } elseif ($email) {
+            $user = User::query()->where('email', $email)->first();
+        } else {
+            $user = null;
+        }
+
+        if (! $user) {
+            $user = User::create([
+                'name' => $name,
+                'email' => $email ?: "line-{$providerId}@goodfriendshop.local",
+                'email_verified_at' => $email ? now() : null,
+                'password' => Hash::make(Str::random(40)),
+                'role' => User::ROLE_CUSTOMER,
+                'status' => User::STATUS_ACTIVE,
+                'avatar_path' => $avatar,
+            ]);
+        } else {
+            $updates = [];
+
+            if (blank($user->avatar_path) && $avatar) {
+                $updates['avatar_path'] = $avatar;
+            }
+
+            if ($email && blank($user->email_verified_at)) {
+                $updates['email_verified_at'] = now();
+            }
+
+            if ($updates) {
+                $user->forceFill($updates)->save();
+            }
+        }
+
+        SocialAccount::query()->updateOrCreate(
+            [
+                'provider' => 'line',
                 'provider_user_id' => $providerId,
             ],
             [

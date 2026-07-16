@@ -124,4 +124,54 @@ class AuthFlowTest extends TestCase
             ->get('/auth/google/callback?code=valid-code&state=wrong-state')
             ->assertRedirect('http://127.0.0.1:3001/login?social_error=invalid_state');
     }
+
+    public function test_line_callback_creates_customer_and_redirects_with_token(): void
+    {
+        config([
+            'services.line.client_id' => 'line-channel-id',
+            'services.line.client_secret' => 'line-channel-secret',
+            'services.line.redirect' => 'http://127.0.0.1:8001/auth/line/callback',
+        ]);
+
+        Http::fake([
+            'https://api.line.me/oauth2/v2.1/token' => Http::response([
+                'access_token' => 'line-access-token',
+                'token_type' => 'Bearer',
+            ]),
+            'https://api.line.me/oauth2/v2.1/userinfo' => Http::response([
+                'sub' => 'line-user-123',
+                'email' => 'line-user@goodfriendshop.test',
+                'name' => 'LINE User',
+                'picture' => 'https://example.com/line-avatar.png',
+            ]),
+        ]);
+
+        $response = $this
+            ->withSession(['oauth_line_state' => 'valid-state'])
+            ->get('/auth/line/callback?code=valid-code&state=valid-state');
+
+        $this->assertStringStartsWith(
+            'http://127.0.0.1:3001/login/social-callback#payload=',
+            $response->headers->get('Location'),
+        );
+        $this->assertDatabaseHas('users', [
+            'email' => 'line-user@goodfriendshop.test',
+            'name' => 'LINE User',
+            'role' => User::ROLE_CUSTOMER,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+        $this->assertDatabaseHas('social_accounts', [
+            'provider' => 'line',
+            'provider_user_id' => 'line-user-123',
+            'email' => 'line-user@goodfriendshop.test',
+        ]);
+    }
+
+    public function test_line_callback_rejects_invalid_state(): void
+    {
+        $this
+            ->withSession(['oauth_line_state' => 'valid-state'])
+            ->get('/auth/line/callback?code=valid-code&state=wrong-state')
+            ->assertRedirect('http://127.0.0.1:3001/login?social_error=invalid_state');
+    }
 }
