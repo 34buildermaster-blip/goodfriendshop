@@ -136,6 +136,10 @@
             margin-bottom: 20px;
         }
 
+        .sales-metrics {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
         .metric-card,
         .panel {
             border: 1px solid var(--line);
@@ -167,6 +171,18 @@
             color: rgba(187, 247, 208, 0.9);
             font-size: 13px;
             font-weight: 800;
+        }
+
+        .sales-card {
+            border-color: rgba(102, 237, 189, 0.22);
+            background:
+                linear-gradient(135deg, rgba(102, 237, 189, 0.14), rgba(14, 165, 233, 0.08)),
+                var(--panel);
+        }
+
+        .sales-card .metric-value {
+            color: #bbf7d0;
+            font-size: clamp(28px, 3vw, 38px);
         }
 
         .main-grid {
@@ -254,6 +270,7 @@
             }
             .nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .sales-metrics { grid-template-columns: 1fr; }
             .main-grid { grid-template-columns: 1fr; }
         }
 
@@ -282,6 +299,16 @@
                     <article class="metric-card">
                         <p class="metric-label">{{ $metric['label'] }}</p>
                         <p class="metric-value">{{ number_format($metric['value']) }}</p>
+                        <p class="metric-note">{{ $metric['note'] }}</p>
+                    </article>
+                @endforeach
+            </section>
+
+            <section class="metrics sales-metrics" aria-label="Sales summary">
+                @foreach ($salesMetrics as $metric)
+                    <article class="metric-card sales-card">
+                        <p class="metric-label">{{ $metric['label'] }}</p>
+                        <p class="metric-value">{{ $metric['value'] }}</p>
                         <p class="metric-note">{{ $metric['note'] }}</p>
                     </article>
                 @endforeach
