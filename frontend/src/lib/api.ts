@@ -141,6 +141,10 @@ export type SiteSettings = {
   contact_email?: string;
   contact_phone?: string;
   facebook_label?: string;
+  support_hours?: string;
+  order_notice?: string;
+  claim_policy?: string;
+  refund_policy?: string;
 };
 
 export type HeroSlideItem = {

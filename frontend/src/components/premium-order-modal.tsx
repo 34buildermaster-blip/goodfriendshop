@@ -9,6 +9,7 @@ import {
   type OrderItem,
   type PremiumProductItem,
 } from "@/lib/api";
+import { useSiteSettings } from "@/components/site-settings-provider";
 
 const fallbackCustomerFieldLabels: Record<string, string> = {
   account_email: "อีเมลบัญชีที่ต้องการใช้งาน",
@@ -26,6 +27,7 @@ export function PremiumOrderModal({
   onClose: () => void;
   product: PremiumProductItem;
 }) {
+  const settings = useSiteSettings();
   const [accountIdentifier, setAccountIdentifier] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -160,6 +162,12 @@ export function PremiumOrderModal({
         <p className="mt-2 text-sm leading-6 text-white/62">
           กรอกข้อมูลบัญชีหรืออีเมลที่ต้องการใช้งาน ทีมงานจะตรวจสอบและอัปเดตสถานะในหน้าโปรไฟล์
         </p>
+
+        {settings.order_notice ? (
+          <div className="mt-4 rounded-2xl border border-amber-300/20 bg-amber-400/10 p-4 text-sm leading-6 text-amber-50/90">
+            {settings.order_notice}
+          </div>
+        ) : null}
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-sm font-medium text-white/85 md:col-span-2">

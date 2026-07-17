@@ -49,7 +49,12 @@
 
                 @php
                     $groupedSettings = $settings->groupBy('group');
-                    $groupLabels = ['general' => 'ข้อมูลร้าน', 'contact' => 'ช่องทางติดต่อ'];
+                    $groupLabels = [
+                        'general' => 'ข้อมูลร้าน',
+                        'contact' => 'ช่องทางติดต่อ',
+                        'policy' => 'นโยบายร้าน',
+                        'notification' => 'แจ้งเตือนแอดมิน',
+                    ];
                 @endphp
 
                 @foreach ($groupedSettings as $group => $items)

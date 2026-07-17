@@ -17,6 +17,13 @@ class SiteSetting extends Model
         'contact_email' => ['label' => 'อีเมล', 'value' => 'xxxxxxx@gmail.com', 'type' => 'text', 'group' => 'contact', 'sort_order' => 60],
         'contact_phone' => ['label' => 'เบอร์โทร', 'value' => 'xxx-xxx-xxxx', 'type' => 'text', 'group' => 'contact', 'sort_order' => 70],
         'facebook_label' => ['label' => 'Facebook', 'value' => 'xxxxxx', 'type' => 'text', 'group' => 'contact', 'sort_order' => 80],
+        'support_hours' => ['label' => 'เวลาทำการฝ่ายซัพพอร์ต', 'value' => 'พร้อมดูแลทุกวัน 10:00-24:00 น.', 'type' => 'text', 'group' => 'contact', 'sort_order' => 90],
+        'order_notice' => ['label' => 'ข้อความแจ้งก่อนสั่งซื้อ', 'value' => 'กรุณาตรวจสอบข้อมูลบัญชีให้ถูกต้องก่อนชำระเงิน หากข้อมูลผิดอาจทำให้ดำเนินการล่าช้า', 'type' => 'textarea', 'group' => 'policy', 'sort_order' => 100],
+        'claim_policy' => ['label' => 'เงื่อนไขการเคลม', 'value' => 'สินค้าที่มีประกันสามารถแจ้งเคลมได้ตามระยะเวลาที่ระบุ พร้อมเลขออเดอร์และหลักฐานปัญหา', 'type' => 'textarea', 'group' => 'policy', 'sort_order' => 110],
+        'refund_policy' => ['label' => 'นโยบายคืนเงิน', 'value' => 'กรณีร้านไม่สามารถดำเนินการได้ จะคืนเงินตามช่องทางที่ลูกค้าชำระเข้ามา หลังตรวจสอบรายการเรียบร้อย', 'type' => 'textarea', 'group' => 'policy', 'sort_order' => 120],
+        'admin_notification_webhook_url' => ['label' => 'Webhook แจ้งเตือนแอดมิน', 'value' => '', 'type' => 'text', 'group' => 'notification', 'sort_order' => 130],
+        'notification_order_created' => ['label' => 'ข้อความแจ้งเตือนออเดอร์ใหม่', 'value' => 'มีออเดอร์ใหม่ #{order_number} ยอด {amount} จาก {customer_name}', 'type' => 'textarea', 'group' => 'notification', 'sort_order' => 140],
+        'notification_order_updated' => ['label' => 'ข้อความแจ้งเตือนอัปเดตออเดอร์', 'value' => 'ออเดอร์ #{order_number} อัปเดตสถานะเป็น {status}', 'type' => 'textarea', 'group' => 'notification', 'sort_order' => 150],
     ];
 
     public static function seedDefaults(): void

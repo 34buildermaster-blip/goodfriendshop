@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  Clock,
   Mail,
   Menu,
   MessageCircle,
@@ -256,6 +257,7 @@ export function SiteFooter() {
   const lineLabel = cleanSiteSettingValue(settings.contact_line) || "xxxxxxx";
   const emailLabel = cleanSiteSettingValue(settings.contact_email) || "xxxxxxx@gmail.com";
   const phoneLabel = cleanSiteSettingValue(settings.contact_phone);
+  const supportHours = cleanSiteSettingValue(settings.support_hours);
   const socialItems = [
     cleanSiteSettingValue(settings.facebook_label) ? "f" : null,
     lineLabel ? "LINE" : null,
@@ -299,6 +301,12 @@ export function SiteFooter() {
                   TEL
                 </span>
                 {phoneLabel}
+              </p>
+            ) : null}
+            {supportHours ? (
+              <p className="flex items-center gap-3">
+                <Clock className="text-white" size={20} />
+                {supportHours}
               </p>
             ) : null}
           </div>

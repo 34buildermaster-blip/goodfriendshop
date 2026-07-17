@@ -20,6 +20,10 @@ const defaultSiteSettings: SiteSettings = {
   contact_email: "xxxxxxx@gmail.com",
   contact_phone: "xxx-xxx-xxxx",
   facebook_label: "xxxxxx",
+  support_hours: "พร้อมดูแลทุกวัน 10:00-24:00 น.",
+  order_notice: "กรุณาตรวจสอบข้อมูลบัญชีให้ถูกต้องก่อนชำระเงิน",
+  claim_policy: "สินค้าที่มีประกันสามารถแจ้งเคลมได้ตามระยะเวลาที่ระบุ",
+  refund_policy: "กรณีร้านไม่สามารถดำเนินการได้ จะคืนเงินหลังตรวจสอบรายการเรียบร้อย",
 };
 
 const SiteSettingsContext = createContext<SiteSettings>(defaultSiteSettings);

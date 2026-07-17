@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\PremiumApp;
 use App\Models\SiteSetting;
 use App\Models\User;
+use App\Services\OrderNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -425,6 +426,8 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
             'status' => Order::STATUS_PENDING,
             'customer_note' => $data['customer_note'] ?? null,
         ]);
+
+        app(OrderNotificationService::class)->orderCreated($order);
 
         return response()->json(['data' => $orderPayload($order)], 201);
     });

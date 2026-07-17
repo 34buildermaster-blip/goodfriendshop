@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Concerns\EnsuresAdminAccess;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\OrderNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -87,6 +88,8 @@ class OrderController extends Controller
         }
 
         $order->update($data);
+
+        app(OrderNotificationService::class)->orderUpdated($order->refresh());
 
         return redirect()
             ->route('admin.orders.index')

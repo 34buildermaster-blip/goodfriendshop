@@ -314,6 +314,16 @@
                 @endforeach
             </section>
 
+            <section class="metrics" aria-label="Reports">
+                @foreach ($reportMetrics as $metric)
+                    <article class="metric-card">
+                        <p class="metric-label">{{ $metric['label'] }}</p>
+                        <p class="metric-value">{{ $metric['value'] }}</p>
+                        <p class="metric-note">{{ $metric['note'] }}</p>
+                    </article>
+                @endforeach
+            </section>
+
             <section class="main-grid">
                 <article class="panel">
                     <p class="panel-kicker">Current function</p>
@@ -324,6 +334,49 @@
                     </p>
                     <a class="button" href="{{ route('admin.products.index') }}">ไปจัดการสินค้า</a>
                     <a class="button" href="{{ route('admin.users.index') }}">ไปจัดการสมาชิก</a>
+                    <a class="button" href="{{ route('admin.orders.index') }}">ไปจัดการออเดอร์</a>
+                </article>
+
+                <aside class="panel">
+                    <p class="panel-kicker">Top products</p>
+                    <h3 class="panel-title">สินค้าขายดีเดือนนี้</h3>
+                    @if ($topProducts->isEmpty())
+                        <p class="empty">ยังไม่มีออเดอร์ที่ชำระแล้วในเดือนนี้</p>
+                    @else
+                        <div class="list">
+                            @foreach ($topProducts as $product)
+                                <div class="list-row">
+                                    <div>
+                                        <strong>{{ $product->package_name }}</strong>
+                                        <span>{{ number_format($product->order_count) }} ออเดอร์</span>
+                                    </div>
+                                    <span>THB {{ number_format((float) $product->total_sales, 2) }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </aside>
+            </section>
+
+            <section class="main-grid" style="margin-top: 20px;">
+                <article class="panel">
+                    <p class="panel-kicker">Recent orders</p>
+                    <h3 class="panel-title">ออเดอร์ล่าสุด</h3>
+                    @if ($recentOrders->isEmpty())
+                        <p class="empty">ยังไม่มีออเดอร์เข้ามา</p>
+                    @else
+                        <div class="list">
+                            @foreach ($recentOrders as $order)
+                                <a class="list-row" href="{{ route('admin.orders.edit', $order) }}">
+                                    <div>
+                                        <strong>{{ $order->order_number }} · {{ $order->package_name }}</strong>
+                                        <span>{{ $order->customer_name ?: '-' }} · {{ $order->created_at->format('d/m/Y H:i') }}</span>
+                                    </div>
+                                    <span>{{ $order->currency }} {{ number_format((float) $order->price, 2) }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
                 </article>
 
                 <aside class="panel">
