@@ -62,6 +62,21 @@
                 </div>
             @endif
 
+            @if ($order->premiumApp)
+                <div class="info" style="margin-top: 14px;">
+                    <span>ข้อมูลดำเนินการแอพพรีเมียม</span>
+                    <p class="muted">
+                        วิธีส่งมอบ: {{ \App\Models\PremiumApp::deliveryTypeLabels()[$order->premiumApp->delivery_type] ?? $order->premiumApp->delivery_type }}<br>
+                        สต็อก: {{ \App\Models\PremiumApp::stockStatusLabels()[$order->premiumApp->stock_status] ?? $order->premiumApp->stock_status }}<br>
+                        Supplier: {{ $order->premiumApp->supplier_name ?: '-' }}<br>
+                        ติดต่อ Supplier: {{ $order->premiumApp->supplier_contact ?: '-' }}
+                    </p>
+                    @if ($order->premiumApp->fulfillment_note)
+                        <p class="muted">{{ $order->premiumApp->fulfillment_note }}</p>
+                    @endif
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('admin.orders.update', $order) }}">
                 @csrf
                 @method('PUT')

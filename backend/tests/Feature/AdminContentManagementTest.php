@@ -29,6 +29,14 @@ class AdminContentManagementTest extends TestCase
             'cost' => 120,
             'currency' => 'THB',
             'duration_days' => 30,
+            'delivery_type' => PremiumApp::DELIVERY_MANUAL_SERVICE,
+            'customer_required_fields' => ['account_email', 'line_id'],
+            'warranty_days' => 7,
+            'stock_status' => PremiumApp::STOCK_IN_STOCK,
+            'supplier_name' => 'Test Supplier',
+            'supplier_contact' => '@supplier',
+            'fulfillment_note' => 'Send order to supplier after payment.',
+            'terms' => 'Warranty follows shop policy.',
             'status' => PremiumApp::STATUS_ACTIVE,
             'sort_order' => 10,
         ]);
@@ -39,6 +47,8 @@ class AdminContentManagementTest extends TestCase
             'slug' => 'netflix-premium',
             'provider' => 'Netflix',
             'status' => PremiumApp::STATUS_ACTIVE,
+            'delivery_type' => PremiumApp::DELIVERY_MANUAL_SERVICE,
+            'stock_status' => PremiumApp::STOCK_IN_STOCK,
         ]);
     }
 

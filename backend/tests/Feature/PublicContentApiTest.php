@@ -55,6 +55,11 @@ class PublicContentApiTest extends TestCase
             'price' => 239,
             'currency' => 'THB',
             'duration_days' => 30,
+            'delivery_type' => PremiumApp::DELIVERY_ACCOUNT_TOPUP,
+            'customer_required_fields' => ['account_email', 'line_id'],
+            'warranty_days' => 7,
+            'stock_status' => PremiumApp::STOCK_IN_STOCK,
+            'terms' => 'Warranty by shop policy.',
             'status' => PremiumApp::STATUS_ACTIVE,
         ]);
         PremiumApp::create([
@@ -69,7 +74,10 @@ class PublicContentApiTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.title', 'Netflix Premium 30 วัน')
-            ->assertJsonPath('data.0.price', '฿239.00');
+            ->assertJsonPath('data.0.price', '฿239.00')
+            ->assertJsonPath('data.0.delivery_type', PremiumApp::DELIVERY_ACCOUNT_TOPUP)
+            ->assertJsonPath('data.0.warranty_days', 7)
+            ->assertJsonPath('data.0.customer_required_fields.0', 'account_email');
     }
 
     public function test_public_content_api_returns_published_posts_and_detail(): void

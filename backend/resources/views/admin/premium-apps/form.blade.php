@@ -26,6 +26,9 @@
         .button.secondary { border: 1px solid var(--line); background: rgba(255, 255, 255, 0.055); color: #fff; }
         .error { color: #fca5a5; font-size: 13px; }
         .hint { color: var(--muted); font-size: 13px; font-weight: 700; }
+        .check-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+        .check-item { display: flex; min-height: 44px; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 14px; padding: 0 12px; background: rgba(255,255,255,.035); color: rgba(255,255,255,.78); font-weight: 800; }
+        .check-item input { width: 18px; height: 18px; }
         @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -104,6 +107,78 @@
                         @error('duration_days') <span class="error">{{ $message }}</span> @enderror
                     </label>
                 </div>
+
+                <div class="grid">
+                    <label>
+                        วิธีส่งมอบ
+                        <select name="delivery_type" required>
+                            @foreach ($deliveryTypeLabels as $value => $label)
+                                <option value="{{ $value }}" @selected(old('delivery_type', $app->delivery_type ?? \App\Models\PremiumApp::DELIVERY_MANUAL_SERVICE) === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('delivery_type') <span class="error">{{ $message }}</span> @enderror
+                    </label>
+                    <label>
+                        สถานะสต็อก
+                        <select name="stock_status" required>
+                            @foreach ($stockStatusLabels as $value => $label)
+                                <option value="{{ $value }}" @selected(old('stock_status', $app->stock_status ?? \App\Models\PremiumApp::STOCK_IN_STOCK) === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('stock_status') <span class="error">{{ $message }}</span> @enderror
+                    </label>
+                </div>
+
+                <label>
+                    ข้อมูลที่ต้องขอจากลูกค้า
+                    <div class="check-grid">
+                        @foreach ($customerFieldLabels as $value => $label)
+                            <label class="check-item">
+                                <input
+                                    name="customer_required_fields[]"
+                                    type="checkbox"
+                                    value="{{ $value }}"
+                                    @checked(in_array($value, old('customer_required_fields', $app->customer_required_fields ?? []), true))
+                                >
+                                <span>{{ $label }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <span class="hint">เลือกเฉพาะข้อมูลที่จำเป็นต่อการเปิดบริการ เช่น อีเมลบัญชี, LINE และอุปกรณ์ที่ใช้</span>
+                    @error('customer_required_fields') <span class="error">{{ $message }}</span> @enderror
+                </label>
+
+                <div class="grid">
+                    <label>
+                        จำนวนวันรับประกัน
+                        <input name="warranty_days" type="number" min="0" value="{{ old('warranty_days', $app->warranty_days) }}" placeholder="7">
+                        @error('warranty_days') <span class="error">{{ $message }}</span> @enderror
+                    </label>
+                    <label>
+                        Supplier
+                        <input name="supplier_name" value="{{ old('supplier_name', $app->supplier_name) }}" placeholder="ชื่อร้าน/ตัวแทน/แหล่งสินค้า">
+                        @error('supplier_name') <span class="error">{{ $message }}</span> @enderror
+                    </label>
+                </div>
+
+                <label>
+                    ช่องทางติดต่อ Supplier
+                    <input name="supplier_contact" value="{{ old('supplier_contact', $app->supplier_contact) }}" placeholder="LINE / Telegram / เบอร์ / URL">
+                    @error('supplier_contact') <span class="error">{{ $message }}</span> @enderror
+                </label>
+
+                <label>
+                    วิธีดำเนินการสำหรับแอดมิน
+                    <textarea name="fulfillment_note" placeholder="เช่น ส่งอีเมลลูกค้าให้ supplier, รอเปิดบริการ 5-30 นาที, ตรวจสอบก่อนเปลี่ยนสถานะเป็นสำเร็จ">{{ old('fulfillment_note', $app->fulfillment_note) }}</textarea>
+                    <span class="hint">ข้อมูลนี้ใช้ในหลังบ้าน ไม่ควรใส่รายละเอียดลับที่ต้องโชว์ลูกค้า</span>
+                    @error('fulfillment_note') <span class="error">{{ $message }}</span> @enderror
+                </label>
+
+                <label>
+                    เงื่อนไขที่แสดงให้ลูกค้าเห็น
+                    <textarea name="terms" placeholder="เช่น ห้ามเปลี่ยนอีเมลระหว่างใช้งาน, รับประกันตามวันที่กำหนด, หากมีปัญหาให้ติดต่อแอดมิน">{{ old('terms', $app->terms) }}</textarea>
+                    @error('terms') <span class="error">{{ $message }}</span> @enderror
+                </label>
 
                 <label>
                     รายละเอียด

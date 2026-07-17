@@ -23,6 +23,8 @@ function PremiumProductCard({
   onOrder: () => void;
   product: PremiumProductItem;
 }) {
+  const soldOut = product.stock_status === "out_of_stock";
+
   return (
     <article className="rounded-[32px] border border-[#586c64]/70 bg-[#161d26]/80 p-4">
       <div className="relative aspect-square overflow-hidden rounded-[28px]">
@@ -40,11 +42,14 @@ function PremiumProductCard({
             {product.title}
           </h3>
           <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-400">
-            ขายดี
+            {product.stock_label ?? "ขายดี"}
           </span>
         </div>
         <p className="text-sm text-emerald-400">ราคาสินค้า</p>
         <p className="mt-1 text-2xl font-bold text-[#ffc012]">{product.price}</p>
+        {product.delivery_label ? (
+          <p className="mt-2 text-sm text-white/62">{product.delivery_label}</p>
+        ) : null}
         <div className="mt-5 grid grid-cols-[1fr_auto] rounded-full bg-[#040f1c] p-1.5">
           <button
             className="flex h-10 items-center justify-center gap-2 rounded-full text-sm font-medium text-white transition hover:bg-white/10"
@@ -55,12 +60,13 @@ function PremiumProductCard({
             รายละเอียด
           </button>
           <button
-            className="flex h-10 items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 text-sm font-semibold text-white transition hover:bg-emerald-400"
+            className="flex h-10 items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 text-sm font-semibold text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/38"
+            disabled={soldOut}
             onClick={onOrder}
             type="button"
           >
             <ShoppingBag size={16} />
-            สั่งซื้อ
+            {soldOut ? "หมด" : "สั่งซื้อ"}
           </button>
         </div>
       </div>
@@ -77,6 +83,8 @@ function ProductDetailModal({
   onOrder: () => void;
   product: PremiumProductItem;
 }) {
+  const soldOut = product.stock_status === "out_of_stock";
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -138,7 +146,7 @@ function ProductDetailModal({
             {[
               ["ระยะเวลา", product.duration],
               ["การเคลม", product.warranty],
-              ["แพลตฟอร์ม", product.platform],
+              ["วิธีส่งมอบ", product.delivery_label ?? product.platform],
             ].map(([label, value]) => (
               <div
                 className="rounded-2xl border border-white/10 bg-white/[0.04] p-4"
@@ -149,6 +157,12 @@ function ProductDetailModal({
               </div>
             ))}
           </div>
+
+          {product.terms ? (
+            <div className="mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4 text-sm leading-6 text-white/75">
+              {product.terms}
+            </div>
+          ) : null}
 
           <div className="mt-6 rounded-3xl border border-white/10 bg-[#07111c] p-5">
             <h3 className="font-semibold text-white">รายละเอียดสินค้า</h3>
@@ -168,12 +182,13 @@ function ProductDetailModal({
               <p className="text-3xl font-bold text-[#ffc012]">{product.price}</p>
             </div>
             <button
-              className="flex h-12 items-center justify-center gap-2 rounded-full bg-emerald-500 px-7 text-base font-semibold text-white transition hover:bg-emerald-400"
+              className="flex h-12 items-center justify-center gap-2 rounded-full bg-emerald-500 px-7 text-base font-semibold text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/38"
+              disabled={soldOut}
               onClick={onOrder}
               type="button"
             >
               <ShoppingBag size={18} />
-              สั่งซื้อ
+              {soldOut ? "สินค้าหมด" : "สั่งซื้อ"}
             </button>
           </div>
         </div>

@@ -384,6 +384,7 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
                     ->whereKey($data['premium_app_id'])
                     ->orWhere('slug', $data['premium_app_id']))
                 ->where('status', PremiumApp::STATUS_ACTIVE)
+                ->whereIn('stock_status', [PremiumApp::STOCK_IN_STOCK, PremiumApp::STOCK_LOW, PremiumApp::STOCK_PREORDER])
                 ->firstOrFail();
         }
 
@@ -408,7 +409,13 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
             'server_identifier' => $data['server_identifier'] ?? null,
             'extra_fields' => [
                 ...($data['extra_fields'] ?? []),
-                ...($premiumApp ? ['premium_app_slug' => $premiumApp->slug] : []),
+                ...($premiumApp ? [
+                    'premium_app_slug' => $premiumApp->slug,
+                    'delivery_type' => $premiumApp->delivery_type,
+                    'delivery_label' => PremiumApp::deliveryTypeLabels()[$premiumApp->delivery_type] ?? $premiumApp->delivery_type,
+                    'required_fields' => $premiumApp->customer_required_fields ?? [],
+                    'warranty_days' => $premiumApp->warranty_days,
+                ] : []),
             ],
             'game_name' => $package?->game->name ?? 'Premium App',
             'package_name' => $package?->name ?? $premiumApp->name,
@@ -463,11 +470,22 @@ Route::middleware(AllowFrontendCors::class)->group(function () {
                 'image' => $app->imageUrl(),
                 'price' => '฿'.number_format((float) $app->price, 2),
                 'duration' => $app->duration_days ? "ใช้งาน {$app->duration_days} วัน" : 'ตามรายละเอียดสินค้า',
-                'warranty' => 'มีเคลมตามเงื่อนไขร้าน',
+                'delivery_type' => $app->delivery_type,
+                'delivery_label' => PremiumApp::deliveryTypeLabels()[$app->delivery_type] ?? $app->delivery_type,
+                'stock_status' => $app->stock_status,
+                'stock_label' => PremiumApp::stockStatusLabels()[$app->stock_status] ?? $app->stock_status,
+                'customer_required_fields' => $app->customer_required_fields ?? [],
+                'customer_field_labels' => PremiumApp::customerFieldLabels(),
+                'warranty_days' => $app->warranty_days,
+                'warranty' => $app->warranty_days !== null ? "รับประกัน {$app->warranty_days} วัน" : 'มีเคลมตามเงื่อนไขร้าน',
+                'terms' => $app->terms,
                 'platform' => $app->provider ?: 'มือถือ / เว็บ',
                 'details' => array_values(array_filter([
                     $app->description,
                     $app->duration_days ? "ระยะเวลาใช้งาน {$app->duration_days} วัน" : null,
+                    PremiumApp::deliveryTypeLabels()[$app->delivery_type] ?? null,
+                    $app->warranty_days !== null ? "รับประกัน {$app->warranty_days} วัน" : null,
+                    $app->terms,
                     'รับข้อมูลหลังชำระเงินสำเร็จ',
                 ])),
             ])

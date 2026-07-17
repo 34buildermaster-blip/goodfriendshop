@@ -51,6 +51,10 @@ class OrderFlowTest extends TestCase
             'description' => 'Premium app package',
             'price' => 89,
             'currency' => 'THB',
+            'delivery_type' => PremiumApp::DELIVERY_ACCOUNT_TOPUP,
+            'customer_required_fields' => ['account_email', 'line_id'],
+            'warranty_days' => 7,
+            'stock_status' => PremiumApp::STOCK_IN_STOCK,
             'status' => PremiumApp::STATUS_ACTIVE,
         ]);
 
@@ -61,6 +65,12 @@ class OrderFlowTest extends TestCase
             'customer_phone' => '0812345678',
             'player_identifier' => 'somchai@example.com',
             'customer_note' => 'Use on mobile',
+            'extra_fields' => [
+                'customer_inputs' => [
+                    'account_email' => 'somchai@example.com',
+                    'line_id' => 'somchai-line',
+                ],
+            ],
         ]);
 
         $response
@@ -76,6 +86,10 @@ class OrderFlowTest extends TestCase
             'game_name' => 'Premium App',
             'package_name' => 'Spotify Premium 30 Days',
         ]);
+        $this->assertSame(
+            PremiumApp::DELIVERY_ACCOUNT_TOPUP,
+            Order::query()->where('premium_app_id', $app->id)->firstOrFail()->extra_fields['delivery_type'],
+        );
     }
 
     public function test_customer_can_register_login_and_see_own_orders(): void

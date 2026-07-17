@@ -93,13 +93,21 @@ export type CreateOrderPayload = {
   player_identifier: string;
   server_identifier?: string;
   customer_note?: string;
-  extra_fields?: Record<string, string>;
+  extra_fields?: Record<string, unknown>;
 };
 
 export type PremiumProductItem = PremiumProduct & {
   image?: string;
   provider?: string | null;
   slug?: string;
+  delivery_type?: string;
+  delivery_label?: string;
+  stock_status?: string;
+  stock_label?: string;
+  customer_required_fields?: string[];
+  customer_field_labels?: Record<string, string>;
+  warranty_days?: number | null;
+  terms?: string | null;
 };
 
 export type NewsItem = {

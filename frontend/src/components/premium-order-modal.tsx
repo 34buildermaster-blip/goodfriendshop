@@ -10,6 +10,15 @@ import {
   type PremiumProductItem,
 } from "@/lib/api";
 
+const fallbackCustomerFieldLabels: Record<string, string> = {
+  account_email: "อีเมลบัญชีที่ต้องการใช้งาน",
+  account_password: "รหัสผ่านบัญชี (ถ้าจำเป็น)",
+  profile_name: "ชื่อโปรไฟล์",
+  line_id: "LINE ID สำหรับติดต่อ",
+  phone: "เบอร์โทรศัพท์",
+  device: "อุปกรณ์ที่ใช้",
+};
+
 export function PremiumOrderModal({
   onClose,
   product,
@@ -22,10 +31,18 @@ export function PremiumOrderModal({
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerNote, setCustomerNote] = useState("");
+  const [customerInputs, setCustomerInputs] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState<OrderItem | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const requiredFields = product.customer_required_fields ?? [];
+  const fieldLabels = {
+    ...fallbackCustomerFieldLabels,
+    ...(product.customer_field_labels ?? {}),
+  };
+  const primaryAccountField =
+    requiredFields.find((field) => field === "account_email") ?? requiredFields[0];
 
   useEffect(() => {
     const token = window.localStorage.getItem("gfs_token");
@@ -37,16 +54,29 @@ export function PremiumOrderModal({
       try {
         const user = JSON.parse(storedUser) as CustomerUser;
         queueMicrotask(() => {
+          const defaultIdentifier =
+            primaryAccountField === "line_id"
+              ? user.line_id
+              : primaryAccountField === "phone"
+                ? user.phone
+                : user.email;
+
           setCustomerName(user.name ?? "");
           setCustomerEmail(user.email ?? "");
           setCustomerPhone(user.phone ?? "");
-          setAccountIdentifier(user.email ?? "");
+          setAccountIdentifier(defaultIdentifier ?? "");
+          setCustomerInputs((current) => ({
+            ...current,
+            account_email: user.email ?? current.account_email ?? "",
+            phone: user.phone ?? current.phone ?? "",
+            line_id: user.line_id ?? current.line_id ?? "",
+          }));
         });
       } catch {
         window.localStorage.removeItem("gfs_user");
       }
     }
-  }, []);
+  }, [primaryAccountField]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -78,6 +108,8 @@ export function PremiumOrderModal({
           extra_fields: {
             product_type: "premium_app",
             product_title: product.title,
+            delivery_label: product.delivery_label,
+            customer_inputs: customerInputs,
           },
         },
         token,
@@ -85,6 +117,7 @@ export function PremiumOrderModal({
 
       setOrder(createdOrder);
       setCustomerNote("");
+      setCustomerInputs({});
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "ไม่สามารถสร้างออเดอร์ได้");
     } finally {
@@ -130,10 +163,18 @@ export function PremiumOrderModal({
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-sm font-medium text-white/85 md:col-span-2">
-            บัญชี / อีเมลที่ต้องการใช้งาน
+            {primaryAccountField ? fieldLabels[primaryAccountField] : "บัญชี / อีเมลที่ต้องการใช้งาน"}
             <input
               className="h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-4 outline-none focus:border-emerald-400"
-              onChange={(event) => setAccountIdentifier(event.target.value)}
+              onChange={(event) => {
+                setAccountIdentifier(event.target.value);
+                if (primaryAccountField) {
+                  setCustomerInputs((current) => ({
+                    ...current,
+                    [primaryAccountField]: event.target.value,
+                  }));
+                }
+              }}
               required
               value={accountIdentifier}
             />
@@ -164,7 +205,41 @@ export function PremiumOrderModal({
               value={customerEmail}
             />
           </label>
+          {requiredFields
+            .filter((field) => field !== primaryAccountField)
+            .map((field) => (
+              <label
+                className="grid gap-2 text-sm font-medium text-white/85"
+                key={field}
+              >
+                {fieldLabels[field] ?? field}
+                <input
+                  className="h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-4 outline-none focus:border-emerald-400"
+                  onChange={(event) =>
+                    setCustomerInputs((current) => ({
+                      ...current,
+                      [field]: event.target.value,
+                    }))
+                  }
+                  required
+                  type={field === "account_password" ? "password" : "text"}
+                  value={customerInputs[field] ?? ""}
+                />
+              </label>
+            ))}
         </div>
+
+        {(product.delivery_label || product.terms) ? (
+          <div className="mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4 text-sm leading-6 text-white/75">
+            {product.delivery_label ? (
+              <p>
+                <span className="font-semibold text-emerald-200">วิธีส่งมอบ:</span>{" "}
+                {product.delivery_label}
+              </p>
+            ) : null}
+            {product.terms ? <p className="mt-1">{product.terms}</p> : null}
+          </div>
+        ) : null}
 
         <label className="mt-4 grid gap-2 text-sm font-medium text-white/85">
           หมายเหตุ

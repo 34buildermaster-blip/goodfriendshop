@@ -40,6 +40,13 @@ export type PremiumProduct = {
   price: string;
   duration: string;
   warranty: string;
+  delivery_label?: string;
+  stock_status?: string;
+  stock_label?: string;
+  customer_required_fields?: string[];
+  customer_field_labels?: Record<string, string>;
+  warranty_days?: number | null;
+  terms?: string | null;
   platform: string;
   description: string;
   details: string[];

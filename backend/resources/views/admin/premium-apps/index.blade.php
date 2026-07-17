@@ -33,6 +33,7 @@
         .badge.active { border-color: rgba(110, 231, 183, 0.24); background: rgba(110, 231, 183, 0.12); color: #bbf7d0; }
         .badge.draft { border-color: rgba(252, 211, 77, 0.24); background: rgba(252, 211, 77, 0.12); color: #fde68a; }
         .badge.inactive { background: rgba(255, 255, 255, 0.06); color: rgba(255, 255, 255, 0.72); }
+        .badge.stock { border-color: rgba(96, 165, 250, 0.24); background: rgba(96, 165, 250, 0.12); color: #bfdbfe; }
         .inline-form { display: inline; }
         .pagination { margin-top: 18px; color: var(--muted); }
         @media (max-width: 760px) { .app-card { grid-template-columns: 1fr; } .actions { justify-content: stretch; } .button { flex: 1; } }
@@ -69,12 +70,14 @@
                                 @if ($app->provider) · ผู้ให้บริการ: {{ $app->provider }} @endif
                                 · <span class="price">{{ number_format((float) $app->price, 2) }} {{ $app->currency }}</span>
                                 @if ($app->duration_days) · {{ $app->duration_days }} วัน @endif
+                                · {{ \App\Models\PremiumApp::deliveryTypeLabels()[$app->delivery_type] ?? $app->delivery_type }}
                             </p>
                             @if ($app->description)
                                 <p class="meta">{{ $app->description }}</p>
                             @endif
                         </div>
                         <div class="actions">
+                            <span class="badge stock">{{ \App\Models\PremiumApp::stockStatusLabels()[$app->stock_status] ?? $app->stock_status }}</span>
                             <span class="badge {{ $app->status }}">{{ $statusLabels[$app->status] ?? $app->status }}</span>
                             <a class="button secondary" href="{{ route('admin.premium-apps.edit', $app) }}">แก้ไข</a>
                             <form class="inline-form" method="POST" action="{{ route('admin.premium-apps.destroy', $app) }}" onsubmit="return confirm('ลบแอพพรีเมียมนี้?')">
