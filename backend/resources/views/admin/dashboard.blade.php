@@ -92,7 +92,7 @@
         .content {
             min-width: 0;
             flex: 1;
-            padding: 30px 34px 56px;
+            padding: 24px 28px 44px;
         }
 
         .topbar {
@@ -100,7 +100,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 18px;
-            margin-bottom: 22px;
+            margin-bottom: 18px;
         }
 
         .eyebrow {
@@ -114,7 +114,7 @@
 
         .page-title {
             margin: 6px 0 0;
-            font-size: clamp(30px, 5vw, 44px);
+            font-size: clamp(28px, 4vw, 38px);
             line-height: 1.12;
         }
 
@@ -131,9 +131,9 @@
 
         .metrics {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            margin-bottom: 14px;
         }
 
         .sales-metrics {
@@ -143,23 +143,23 @@
         .metric-card,
         .panel {
             border: 1px solid var(--line);
-            border-radius: 28px;
+            border-radius: 22px;
             background: var(--panel);
-            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 18px 52px rgba(0, 0, 0, 0.18);
         }
 
         .metric-card {
             position: relative;
             overflow: hidden;
-            min-height: 142px;
-            padding: 20px;
+            min-height: 116px;
+            padding: 16px;
         }
 
         .metric-card::before {
             content: "";
             position: absolute;
             inset: 0 0 auto;
-            height: 5px;
+            height: 4px;
             background: var(--accent, var(--green));
         }
 
@@ -225,20 +225,20 @@
         .metric-label {
             margin: 0;
             color: var(--muted);
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 800;
         }
 
         .metric-value {
-            margin: 22px 0 0;
-            font-size: 34px;
+            margin: 16px 0 0;
+            font-size: 27px;
             font-weight: 900;
         }
 
         .metric-note {
             margin: 4px 0 0;
             color: color-mix(in srgb, var(--accent, #bbf7d0) 62%, white);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 800;
         }
 
@@ -251,56 +251,58 @@
 
         .sales-card .metric-value {
             color: color-mix(in srgb, var(--accent, #bbf7d0) 70%, white);
-            font-size: clamp(28px, 3vw, 38px);
+            font-size: clamp(24px, 2.5vw, 31px);
         }
 
         .main-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) 360px;
-            gap: 20px;
+            grid-template-columns: minmax(0, 1fr) 330px;
+            gap: 14px;
         }
 
         .panel {
-            padding: 22px;
+            padding: 18px;
         }
 
         .panel-kicker {
             margin: 0;
             color: rgba(102, 237, 189, 0.75);
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 900;
             letter-spacing: 0.12em;
             text-transform: uppercase;
         }
 
         .panel-title {
-            margin: 6px 0 8px;
-            font-size: 24px;
+            margin: 5px 0 7px;
+            font-size: 20px;
         }
 
         .panel-text {
             margin: 0;
             color: var(--muted);
-            line-height: 1.75;
+            font-size: 14px;
+            line-height: 1.65;
         }
 
         .button {
             display: inline-flex;
-            min-height: 46px;
+            min-height: 40px;
             align-items: center;
             justify-content: center;
-            margin-top: 18px;
-            border-radius: 16px;
-            padding: 0 18px;
+            margin-top: 14px;
+            border-radius: 13px;
+            padding: 0 14px;
             background: var(--green);
             color: #05140f;
+            font-size: 13px;
             font-weight: 900;
         }
 
         .list {
             display: grid;
-            gap: 10px;
-            margin-top: 18px;
+            gap: 8px;
+            margin-top: 14px;
         }
 
         .list-row {
@@ -309,19 +311,19 @@
             justify-content: space-between;
             gap: 12px;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            padding: 14px 16px;
+            border-radius: 14px;
+            padding: 11px 13px;
             background: rgba(255, 255, 255, 0.035);
         }
 
         .list-row strong {
             display: block;
-            font-size: 15px;
+            font-size: 14px;
         }
 
         .list-row span {
             color: var(--muted);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
         }
 
