@@ -149,8 +149,77 @@
         }
 
         .metric-card {
+            position: relative;
+            overflow: hidden;
             min-height: 142px;
             padding: 20px;
+        }
+
+        .metric-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto;
+            height: 5px;
+            background: var(--accent, var(--green));
+        }
+
+        .metric-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at 100% 0%, var(--accent-soft, rgba(102, 237, 189, 0.12)), transparent 58%);
+        }
+
+        .metric-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-card.tone-green,
+        .metric-card.tone-emerald {
+            --accent: #34d399;
+            --accent-soft: rgba(52, 211, 153, 0.18);
+        }
+
+        .metric-card.tone-cyan {
+            --accent: #22d3ee;
+            --accent-soft: rgba(34, 211, 238, 0.16);
+        }
+
+        .metric-card.tone-teal {
+            --accent: #2dd4bf;
+            --accent-soft: rgba(45, 212, 191, 0.16);
+        }
+
+        .metric-card.tone-lime {
+            --accent: #a3e635;
+            --accent-soft: rgba(163, 230, 53, 0.15);
+        }
+
+        .metric-card.tone-sky {
+            --accent: #38bdf8;
+            --accent-soft: rgba(56, 189, 248, 0.16);
+        }
+
+        .metric-card.tone-violet {
+            --accent: #a78bfa;
+            --accent-soft: rgba(167, 139, 250, 0.16);
+        }
+
+        .metric-card.tone-gold {
+            --accent: #fbbf24;
+            --accent-soft: rgba(251, 191, 36, 0.17);
+        }
+
+        .metric-card.tone-rose {
+            --accent: #fb7185;
+            --accent-soft: rgba(251, 113, 133, 0.16);
+        }
+
+        .metric-card.tone-pink {
+            --accent: #f472b6;
+            --accent-soft: rgba(244, 114, 182, 0.15);
         }
 
         .metric-label {
@@ -168,20 +237,20 @@
 
         .metric-note {
             margin: 4px 0 0;
-            color: rgba(187, 247, 208, 0.9);
+            color: color-mix(in srgb, var(--accent, #bbf7d0) 62%, white);
             font-size: 13px;
             font-weight: 800;
         }
 
         .sales-card {
-            border-color: rgba(102, 237, 189, 0.22);
+            border-color: color-mix(in srgb, var(--accent, #66edbd) 34%, transparent);
             background:
-                linear-gradient(135deg, rgba(102, 237, 189, 0.14), rgba(14, 165, 233, 0.08)),
+                linear-gradient(135deg, var(--accent-soft, rgba(102, 237, 189, 0.14)), rgba(255, 255, 255, 0.025)),
                 var(--panel);
         }
 
         .sales-card .metric-value {
-            color: #bbf7d0;
+            color: color-mix(in srgb, var(--accent, #bbf7d0) 70%, white);
             font-size: clamp(28px, 3vw, 38px);
         }
 
@@ -296,7 +365,7 @@
 
             <section class="metrics" aria-label="Overview">
                 @foreach ($metrics as $metric)
-                    <article class="metric-card">
+                    <article class="metric-card tone-{{ $metric['tone'] ?? 'green' }}">
                         <p class="metric-label">{{ $metric['label'] }}</p>
                         <p class="metric-value">{{ number_format($metric['value']) }}</p>
                         <p class="metric-note">{{ $metric['note'] }}</p>
@@ -305,8 +374,9 @@
             </section>
 
             <section class="metrics sales-metrics" aria-label="Sales summary">
+                @php($salesTones = ['emerald', 'sky', 'violet'])
                 @foreach ($salesMetrics as $metric)
-                    <article class="metric-card sales-card">
+                    <article class="metric-card sales-card tone-{{ $salesTones[$loop->index] ?? 'emerald' }}">
                         <p class="metric-label">{{ $metric['label'] }}</p>
                         <p class="metric-value">{{ $metric['value'] }}</p>
                         <p class="metric-note">{{ $metric['note'] }}</p>
@@ -315,8 +385,9 @@
             </section>
 
             <section class="metrics" aria-label="Reports">
+                @php($reportTones = ['gold', 'rose', 'cyan', 'pink'])
                 @foreach ($reportMetrics as $metric)
-                    <article class="metric-card">
+                    <article class="metric-card tone-{{ $reportTones[$loop->index] ?? 'teal' }}">
                         <p class="metric-label">{{ $metric['label'] }}</p>
                         <p class="metric-value">{{ $metric['value'] }}</p>
                         <p class="metric-note">{{ $metric['note'] }}</p>
